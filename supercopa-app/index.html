@@ -1,0 +1,1913 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Supercopa de Playa</title>
+    <style>
+        /* ===== RESET Y VARIABLES ===== */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root {
+            --bg-body: #f2f4f8;
+            --bg-card: #ffffff;
+            --bg-input: #f8fafc;
+            --border: #e2e8f0;
+            --text: #0f172a;
+            --text-muted: #475569;
+            --accent: #e11d48;
+            --accent-hover: #be123c;
+            --shadow: 0 2px 8px rgba(0,0,0,0.06);
+            --radius: 8px;
+            --font: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            --transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        [data-theme="dark"] {
+            --bg-body: #0b1120;
+            --bg-card: #1e293b;
+            --bg-input: #2d3a4f;
+            --border: #334155;
+            --text: #f1f5f9;
+            --text-muted: #94a3b8;
+            --shadow: 0 4px 16px rgba(0,0,0,0.4);
+            --accent: #f43f5e;
+            --accent-hover: #e11d48;
+        }
+        [data-theme="green"] {
+            --bg-body: #1a3d2b;
+            --bg-card: #2a5a3a;
+            --bg-input: #3a6f4a;
+            --border: #4d8a5e;
+            --text: #f0fdf4;
+            --text-muted: #bbf7d0;
+            --shadow: 0 4px 16px rgba(0,0,0,0.3);
+            --accent: #facc15;
+            --accent-hover: #eab308;
+        }
+
+        body { font-family: var(--font); background: var(--bg-body); color: var(--text); padding: 16px; min-height: 100vh; transition: background 0.3s, color 0.3s; }
+        .app { max-width: 1280px; margin: 0 auto; }
+
+        /* ===== HEADER ===== */
+        .header {
+            display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px;
+            padding: 12px 20px; background: var(--bg-card); border: 1px solid var(--border);
+            box-shadow: var(--shadow); border-radius: var(--radius); margin-bottom: 28px;
+            transition: background 0.3s, border 0.3s;
+        }
+        .header-left { display: flex; align-items: center; gap: 14px; }
+        .header-left .liga-logo { width: 48px; height: 48px; object-fit: contain; border-radius: 50%; background: var(--bg-input); border: 2px solid var(--accent); cursor: pointer; }
+        .header-left h1 { font-size: 1.6rem; font-weight: 800; letter-spacing: -0.5px; color: var(--text); }
+        .header-left h1 span { color: var(--accent); }
+        .header-controls { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+        .theme-selector { display: flex; gap: 4px; background: var(--bg-input); padding: 4px; border: 1px solid var(--border); border-radius: var(--radius); }
+        .theme-btn { background: transparent; border: none; color: var(--text-muted); padding: 6px 14px; cursor: pointer; font-weight: 600; font-size: 0.8rem; transition: 0.15s; border-radius: var(--radius); font-family: var(--font); }
+        .theme-btn.active { background: var(--accent); color: #fff; }
+        .theme-btn:hover { opacity: 0.8; }
+        .back-btn { background: var(--bg-input); border: 1px solid var(--border); color: var(--text); padding: 8px 20px; cursor: pointer; font-weight: 600; transition: 0.15s; border-radius: var(--radius); font-family: var(--font); }
+        .back-btn:hover { background: var(--accent); color: #fff; border-color: var(--accent); }
+        .reset-btn { background: #dc2626; color: white; border-color: #dc2626; }
+        .reset-btn:hover { background: #b91c1c; border-color: #b91c1c; color: white; }
+        .admin-btn { background: #2563eb; color: white; border-color: #2563eb; }
+        .admin-btn:hover { background: #1d4ed8; border-color: #1d4ed8; color: white; }
+        .login-btn { background: #22c55e; color: white; border-color: #22c55e; }
+        .login-btn:hover { background: #16a34a; border-color: #16a34a; color: white; }
+
+        /* ===== TABLA GENERAL ===== */
+        .standings-container { background: var(--bg-card); border: 1px solid var(--border); box-shadow: var(--shadow); padding: 20px; border-radius: var(--radius); margin-bottom: 28px; transition: background 0.3s, border 0.3s; }
+        .standings-title { font-size: 1.4rem; font-weight: 700; margin-bottom: 16px; display: flex; align-items: center; gap: 12px; color: var(--text); }
+        .standings-title span { background: var(--accent); color: #fff; padding: 2px 14px; font-size: 0.8rem; font-weight: 700; border-radius: 20px; }
+        .standings-table { width: 100%; border-collapse: collapse; font-size: 0.9rem; color: var(--text); }
+        .standings-table th { text-align: left; padding: 12px 8px; color: var(--text-muted); font-weight: 600; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.3px; border-bottom: 2px solid var(--border); }
+        .standings-table td { padding: 12px 8px; border-bottom: 1px solid var(--border); vertical-align: middle; }
+        .standings-table tr { cursor: pointer; transition: background 0.15s; }
+        .standings-table tr:hover { background: var(--bg-input); }
+        .standings-table .pos { font-weight: 700; color: var(--accent); width: 32px; text-align: center; }
+        .standings-table .team-name { display: flex; align-items: center; gap: 12px; font-weight: 600; }
+        .standings-table .team-logo { width: 30px; height: 30px; border-radius: 50%; object-fit: cover; border: 1px solid var(--border); background: var(--bg-input); display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.8rem; flex-shrink: 0; text-transform: uppercase; color: #fff; }
+        .standings-table .pts { font-weight: 700; font-size: 1.05rem; color: var(--accent); }
+        .standings-table .gd.positive { color: #22c55e; }
+        .standings-table .gd.negative { color: #ef4444; }
+
+        /* ===== GOLEADORES ===== */
+        #scorersContainer { background: var(--bg-card); border: 1px solid var(--border); box-shadow: var(--shadow); padding: 20px; border-radius: var(--radius); margin-bottom: 28px; transition: background 0.3s, border 0.3s; }
+        .scorers-title { font-size: 1.4rem; font-weight: 700; margin-bottom: 16px; display: flex; align-items: center; gap: 12px; color: var(--text); }
+        .scorers-title span { background: var(--accent); color: #fff; padding: 2px 14px; font-size: 0.8rem; font-weight: 700; border-radius: 20px; }
+        .scorers-table { width: 100%; border-collapse: collapse; font-size: 0.9rem; color: var(--text); }
+        .scorers-table th { text-align: left; padding: 10px 8px; color: var(--text-muted); font-weight: 600; font-size: 0.75rem; text-transform: uppercase; border-bottom: 2px solid var(--border); }
+        .scorers-table td { padding: 10px 8px; border-bottom: 1px solid var(--border); }
+        .scorers-table .pos { font-weight: 700; color: var(--accent); width: 32px; text-align: center; }
+
+        /* ===== NOTICIAS ===== */
+        #newsSection { background: var(--bg-card); border: 1px solid var(--border); box-shadow: var(--shadow); padding: 20px; border-radius: var(--radius); margin-bottom: 28px; transition: background 0.3s, border 0.3s; }
+        .section-header { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; margin-bottom: 18px; border-bottom: 3px solid var(--accent); padding-bottom: 10px; }
+        .section-header h2 { font-size: 1.5rem; font-weight: 700; color: var(--text); }
+        .section-header .actions { display: flex; gap: 8px; }
+        .btn-add { background: var(--accent); color: #fff; border: none; padding: 6px 16px; font-weight: 600; font-size: 0.85rem; cursor: pointer; border-radius: var(--radius); transition: 0.15s; font-family: var(--font); }
+        .btn-add:hover { background: var(--accent-hover); }
+
+        .news-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 24px; }
+        .news-card { background: var(--bg-input); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; transition: 0.2s; position: relative; animation: fadeUp 0.5s ease; }
+        .news-card:hover { border-color: var(--accent); box-shadow: 0 4px 16px rgba(0,0,0,0.08); }
+        .news-card .news-img { width: 100%; height: 180px; object-fit: cover; background: var(--border); display: block; }
+        .news-card .news-body { padding: 16px; }
+        .news-card .news-body .match { font-weight: 700; font-size: 1.1rem; color: var(--text); }
+        .news-card .news-body .datetime { font-size: 0.85rem; color: var(--text-muted); margin: 4px 0 10px 0; }
+        .news-card .news-body .prediction-bar { margin-top: 8px; }
+        .news-card .news-body .prediction-bar .bar-container { position: relative; height: 24px; background: var(--bg-card); border-radius: 20px; overflow: hidden; border: 1px solid var(--border); display: flex; }
+        .news-card .news-body .prediction-bar .bar-segment { height: 100%; transition: width 0.6s ease; display: flex; align-items: center; justify-content: center; font-size: 0.7rem; font-weight: 700; color: #fff; text-shadow: 0 1px 2px rgba(0,0,0,0.3); white-space: nowrap; }
+        .news-card .news-body .prediction-bar .bar-segment:first-child { border-radius: 20px 0 0 20px; }
+        .news-card .news-body .prediction-bar .bar-segment:last-child { border-radius: 0 20px 20px 0; }
+        .news-card .delete-news { position: absolute; top: 8px; right: 10px; background: rgba(0,0,0,0.5); border: none; color: #fff; width: 26px; height: 26px; border-radius: 50%; cursor: pointer; font-size: 1rem; line-height: 1; transition: 0.15s; display: flex; align-items: center; justify-content: center; }
+        .news-card .delete-news:hover { background: var(--accent); }
+
+        /* ===== TRANSFERENCIAS ===== */
+        .transfer-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 16px; margin-top: 12px; }
+        .transfer-card { background: var(--bg-input); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px; transition: 0.2s; position: relative; animation: fadeUp 0.5s ease; cursor: pointer; }
+        .transfer-card:hover { border-color: var(--accent); }
+        .transfer-card .transfer-img { width: 100%; height: 120px; object-fit: cover; border-radius: var(--radius); margin-bottom: 10px; background: var(--border); }
+        .transfer-card .club { font-weight: 600; font-size: 0.9rem; color: var(--text-muted); }
+        .transfer-card .player { font-size: 1.1rem; font-weight: 700; margin: 4px 0; color: var(--text); }
+        .transfer-card .type { display: inline-block; background: var(--accent); color: #fff; padding: 0 12px; font-size: 0.7rem; font-weight: 700; text-transform: uppercase; border-radius: 12px; }
+        .transfer-card .detail { font-size: 0.85rem; color: var(--text-muted); margin-top: 6px; }
+        .transfer-card .delete-transfer { position: absolute; top: 8px; right: 10px; background: rgba(0,0,0,0.5); border: none; color: #fff; width: 26px; height: 26px; border-radius: 50%; cursor: pointer; font-size: 1rem; line-height: 1; transition: 0.15s; display: flex; align-items: center; justify-content: center; z-index: 2; }
+        .transfer-card .delete-transfer:hover { background: var(--accent); }
+
+        /* ===== MODAL TRANSFERENCIA ===== */
+        .transfer-modal-overlay {
+            display: none;
+            position: fixed;
+            top:0; left:0; right:0; bottom:0;
+            background: rgba(0,0,0,0.7);
+            backdrop-filter: blur(4px);
+            z-index: 3000;
+            justify-content: center;
+            align-items: center;
+        }
+        .transfer-modal-overlay.active { display: flex; }
+        .transfer-modal {
+            background: var(--bg-card);
+            border-radius: var(--radius);
+            padding: 28px;
+            max-width: 500px;
+            width: 90%;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+            color: var(--text);
+            position: relative;
+            animation: cardPop 0.3s ease;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+        .transfer-modal .close-modal {
+            position: absolute;
+            top: 12px;
+            right: 16px;
+            background: transparent;
+            border: none;
+            font-size: 1.8rem;
+            cursor: pointer;
+            color: var(--text-muted);
+            transition: 0.15s;
+            z-index: 1;
+        }
+        .transfer-modal .close-modal:hover { color: var(--accent); }
+        .transfer-modal .modal-img { width: 100%; max-height: 300px; object-fit: contain; border-radius: var(--radius); background: var(--bg-input); }
+        .transfer-modal .modal-club { font-weight: 600; font-size: 0.95rem; color: var(--text-muted); margin-top: 12px; }
+        .transfer-modal .modal-player { font-size: 1.6rem; font-weight: 700; margin: 4px 0; }
+        .transfer-modal .modal-type { display: inline-block; background: var(--accent); color: #fff; padding: 0 16px; border-radius: 12px; font-weight: 700; font-size: 0.85rem; text-transform: uppercase; margin: 6px 0; }
+        .transfer-modal .modal-detail { font-size: 1rem; color: var(--text); margin-top: 8px; line-height: 1.5; }
+
+        /* ===== DETALLE EQUIPO ===== */
+        .team-detail { display: none; background: var(--bg-card); border: 1px solid var(--border); box-shadow: var(--shadow); padding: 20px; border-radius: var(--radius); animation: slideIn 0.4s ease; transition: background 0.3s, border 0.3s; }
+        .team-detail.active { display: block; }
+        @keyframes slideIn { 0% { opacity: 0; transform: translateY(20px); } 100% { opacity: 1; transform: translateY(0); } }
+        @keyframes fadeUp { 0% { opacity: 0; transform: translateY(12px); } 100% { opacity: 1; transform: translateY(0); } }
+        @keyframes cardPop { 0% { opacity: 0; transform: scale(0.9); } 100% { opacity: 1; transform: scale(1); } }
+
+        .team-header { display: flex; align-items: center; gap: 24px; flex-wrap: wrap; padding-bottom: 16px; border-bottom: 2px solid var(--border); margin-bottom: 20px; }
+        .team-header .logo-wrapper { position: relative; width: 72px; height: 72px; flex-shrink: 0; }
+        .team-header .logo-wrapper img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; border: 2px solid var(--accent); background: var(--bg-input); }
+        .team-header .logo-wrapper .logo-placeholder { width: 100%; height: 100%; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 2rem; font-weight: 700; background: var(--bg-input); border: 2px dashed var(--border); color: var(--text-muted); }
+        .team-header .info h2 { font-size: 2rem; font-weight: 700; margin-bottom: 6px; color: var(--text); }
+        .team-header .info .stats-row { display: flex; gap: 16px; flex-wrap: wrap; }
+        .team-header .info .stats-row .stat-item { background: var(--bg-input); padding: 2px 14px; border: 1px solid var(--border); border-radius: 20px; font-size: 0.85rem; }
+        .team-header .info .stats-row .stat-item strong { color: var(--accent); }
+        .upload-btn { background: var(--bg-input); border: 1px dashed var(--border); color: var(--text-muted); padding: 2px 12px; cursor: pointer; font-size: 0.7rem; transition: 0.15s; border-radius: 20px; font-family: var(--font); margin-top: 4px; }
+        .upload-btn:hover { border-color: var(--accent); color: var(--text); }
+
+        .section-title { font-size: 1.2rem; font-weight: 700; margin: 28px 0 14px 0; display: flex; align-items: center; gap: 10px; color: var(--text); }
+        .section-title .badge { background: var(--border); padding: 0 12px; font-size: 0.7rem; color: var(--text-muted); border-radius: 20px; }
+
+        .players-table { width: 100%; border-collapse: collapse; font-size: 0.9rem; color: var(--text); }
+        .players-table th { text-align: left; padding: 10px 8px; color: var(--text-muted); font-weight: 600; font-size: 0.75rem; text-transform: uppercase; border-bottom: 2px solid var(--border); }
+        .players-table td { padding: 10px 8px; border-bottom: 1px solid var(--border); cursor: pointer; transition: background 0.15s; }
+        .players-table tr:hover td { background: var(--bg-input); }
+        .players-table .number { font-weight: 700; color: var(--accent); width: 40px; text-align: center; }
+        .players-table .position { background: var(--bg-input); padding: 0 10px; border: 1px solid var(--border); border-radius: 12px; font-size: 0.75rem; display: inline-block; }
+        .players-table .goals-assists { display: flex; gap: 12px; }
+        .players-table .goals-assists span { background: var(--bg-input); padding: 0 8px; border: 1px solid var(--border); border-radius: 12px; }
+
+        /* ===== MODAL JUGADOR ===== */
+        .player-modal { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.6); backdrop-filter: blur(6px); z-index: 2000; justify-content: center; align-items: center; }
+        .player-modal.active { display: flex; }
+        .player-card { background: var(--bg-card); border-radius: 16px; padding: 32px; max-width: 360px; width: 90%; box-shadow: 0 20px 60px rgba(0,0,0,0.4); color: var(--text); position: relative; overflow: hidden; animation: cardPop 0.4s ease; }
+        .player-card .shine {
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: repeating-linear-gradient(45deg, transparent 0px, transparent 20px, rgba(255,255,255,0.1) 20px, rgba(255,255,255,0.1) 40px);
+            pointer-events: none;
+            animation: shineMove 2s linear infinite;
+            animation-play-state: paused;
+        }
+        .player-card .shine.active {
+            animation-play-state: running;
+        }
+        @keyframes shineMove {
+            0% { transform: translateX(-100%) translateY(-100%) rotate(45deg); }
+            100% { transform: translateX(100%) translateY(100%) rotate(45deg); }
+        }
+        .player-card .close-modal { position: absolute; top: 12px; right: 16px; background: transparent; border: none; font-size: 1.8rem; cursor: pointer; color: var(--text-muted); z-index: 10; transition: 0.15s; }
+        .player-card .close-modal:hover { color: var(--accent); }
+        .player-card .player-avatar {
+            width: 100px; height: 100px; border-radius: 50%; background: var(--bg-input); border: 3px solid var(--accent);
+            margin: 0 auto 16px; display: flex; align-items: center; justify-content: center;
+            font-size: 3rem; font-weight: 700; color: var(--accent); text-transform: uppercase;
+            cursor: pointer; overflow: hidden; position: relative;
+        }
+        .player-card .player-avatar img {
+            width: 100%; height: 100%; object-fit: cover;
+        }
+        .player-card .player-avatar .initials {
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 3rem; font-weight: 700; color: var(--accent);
+            background: var(--bg-input);
+            text-transform: uppercase;
+        }
+        .player-card .player-name { font-size: 1.6rem; font-weight: 700; text-align: center; margin-bottom: 4px; }
+        .player-card .player-team { text-align: center; color: var(--text-muted); margin-bottom: 12px; }
+        .player-card .player-stats { display: flex; justify-content: center; gap: 24px; margin: 16px 0; }
+        .player-card .player-stats div { text-align: center; }
+        .player-card .player-stats div .num { font-size: 1.4rem; font-weight: 700; color: var(--accent); }
+        .player-card .player-stats div .label { font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; }
+        .player-card .player-number { text-align: center; font-size: 0.9rem; color: var(--text-muted); }
+        .player-card .upload-photo-btn {
+            display: block;
+            margin: 12px auto 0;
+            background: var(--bg-input);
+            border: 1px solid var(--border);
+            color: var(--text);
+            padding: 4px 16px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            cursor: pointer;
+            transition: 0.15s;
+            font-family: var(--font);
+        }
+        .player-card .upload-photo-btn:hover {
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+
+        /* ===== MISC ===== */
+        .fixtures-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 12px; margin-top: 6px; }
+        .fixture-card { background: var(--bg-input); padding: 14px 16px; border: 1px solid var(--border); border-radius: var(--radius); transition: 0.15s; }
+        .fixture-card:hover { border-color: var(--accent); }
+        .fixture-card .opponent { display: flex; justify-content: space-between; font-weight: 600; }
+        .fixture-card .result { font-weight: 700; color: var(--accent); }
+        .fixture-card .type { font-size: 0.7rem; background: var(--border); padding: 0 10px; border-radius: 12px; color: var(--text-muted); display: inline-block; margin-top: 6px; }
+        .fixture-card .date { font-size: 0.75rem; color: var(--text-muted); margin-top: 4px; }
+
+        [contenteditable="true"] { outline: none; padding: 2px 4px; transition: background 0.15s; border-radius: 4px; background: transparent; }
+        [contenteditable="true"]:hover { background: var(--bg-input); }
+        [contenteditable="true"]:focus { background: var(--bg-input); box-shadow: 0 0 0 2px var(--accent); }
+        [contenteditable="false"] { cursor: default; opacity: 0.9; }
+
+        /* ===== MODAL NOTICIAS ===== */
+        .modal-overlay { display: none; position: fixed; top:0; left:0; right:0; bottom:0; background: rgba(0,0,0,0.5); backdrop-filter: blur(4px); z-index: 1500; justify-content: center; align-items: center; }
+        .modal-overlay.active { display: flex; }
+        .modal { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius); padding: 28px; max-width: 520px; width: 90%; box-shadow: 0 20px 60px rgba(0,0,0,0.3); color: var(--text); max-height: 90vh; overflow-y: auto; }
+        .modal h3 { font-size: 1.4rem; font-weight: 700; margin-bottom: 16px; }
+        .modal label { display: block; font-weight: 600; margin-top: 12px; font-size: 0.9rem; }
+        .modal input, .modal select, .modal textarea { width: 100%; padding: 8px 12px; border: 1px solid var(--border); background: var(--bg-input); color: var(--text); border-radius: var(--radius); font-family: var(--font); font-size: 0.95rem; margin-top: 4px; }
+        .modal input[type="file"] { padding: 4px; }
+        .modal textarea { resize: vertical; min-height: 60px; }
+        .modal .modal-actions { display: flex; gap: 12px; margin-top: 20px; justify-content: flex-end; }
+        .modal .modal-actions button { padding: 8px 24px; border: none; font-weight: 600; cursor: pointer; border-radius: var(--radius); font-family: var(--font); }
+        .modal .modal-actions .btn-cancel { background: var(--bg-input); border: 1px solid var(--border); color: var(--text); }
+        .modal .modal-actions .btn-save { background: var(--accent); color: #fff; }
+        .modal .modal-actions .btn-save:hover { background: var(--accent-hover); }
+
+        /* ===== MODAL AÑADIR PARTIDO (LIGA / AMISTOSO) ===== */
+        .fixture-modal-overlay {
+            display: none;
+            position: fixed;
+            top:0; left:0; right:0; bottom:0;
+            background: rgba(0,0,0,0.6);
+            backdrop-filter: blur(4px);
+            z-index: 1600;
+            justify-content: center;
+            align-items: center;
+        }
+        .fixture-modal-overlay.active { display: flex; }
+        .fixture-modal {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 28px;
+            max-width: 400px;
+            width: 90%;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            color: var(--text);
+        }
+        .fixture-modal h3 { font-size: 1.4rem; font-weight: 700; margin-bottom: 16px; }
+        .fixture-modal label { display: block; font-weight: 600; margin-top: 12px; font-size: 0.9rem; }
+        .fixture-modal select, .fixture-modal input {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid var(--border);
+            background: var(--bg-input);
+            color: var(--text);
+            border-radius: var(--radius);
+            font-family: var(--font);
+            font-size: 0.95rem;
+            margin-top: 4px;
+        }
+        .fixture-modal .modal-actions {
+            display: flex;
+            gap: 12px;
+            margin-top: 20px;
+            justify-content: flex-end;
+        }
+        .fixture-modal .modal-actions button {
+            padding: 8px 24px;
+            border: none;
+            font-weight: 600;
+            cursor: pointer;
+            border-radius: var(--radius);
+            font-family: var(--font);
+        }
+        .fixture-modal .modal-actions .btn-cancel {
+            background: var(--bg-input);
+            border: 1px solid var(--border);
+            color: var(--text);
+        }
+        .fixture-modal .modal-actions .btn-save {
+            background: var(--accent);
+            color: #fff;
+        }
+        .fixture-modal .modal-actions .btn-save:hover {
+            background: var(--accent-hover);
+        }
+
+        /* ===== MODAL LOGIN ===== */
+        .login-modal-overlay {
+            display: none;
+            position: fixed;
+            top:0; left:0; right:0; bottom:0;
+            background: rgba(0,0,0,0.6);
+            backdrop-filter: blur(4px);
+            z-index: 5000;
+            justify-content: center;
+            align-items: center;
+        }
+        .login-modal-overlay.active { display: flex; }
+        .login-modal {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 28px;
+            max-width: 360px;
+            width: 90%;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            color: var(--text);
+        }
+        .login-modal h3 { font-size: 1.4rem; font-weight: 700; margin-bottom: 16px; text-align: center; }
+        .login-modal label { display: block; font-weight: 600; margin-top: 12px; font-size: 0.9rem; }
+        .login-modal input {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid var(--border);
+            background: var(--bg-input);
+            color: var(--text);
+            border-radius: var(--radius);
+            font-family: var(--font);
+            font-size: 0.95rem;
+            margin-top: 4px;
+        }
+        .login-modal .modal-actions {
+            display: flex;
+            gap: 12px;
+            margin-top: 20px;
+            justify-content: flex-end;
+        }
+        .login-modal .modal-actions button {
+            padding: 8px 24px;
+            border: none;
+            font-weight: 600;
+            cursor: pointer;
+            border-radius: var(--radius);
+            font-family: var(--font);
+        }
+        .login-modal .modal-actions .btn-cancel {
+            background: var(--bg-input);
+            border: 1px solid var(--border);
+            color: var(--text);
+        }
+        .login-modal .modal-actions .btn-save {
+            background: var(--accent);
+            color: #fff;
+        }
+        .login-modal .modal-actions .btn-save:hover {
+            background: var(--accent-hover);
+        }
+        .login-error {
+            color: #ef4444;
+            font-size: 0.85rem;
+            margin-top: 8px;
+            text-align: center;
+        }
+
+        /* ===== RESPONSIVE ===== */
+        @media (max-width: 700px) {
+            .header { flex-direction: column; align-items: stretch; }
+            .standings-table th, .standings-table td { padding: 8px 4px; font-size: 0.75rem; }
+            .team-header { flex-direction: column; align-items: flex-start; }
+            .news-grid { grid-template-columns: 1fr; }
+            .transfer-grid { grid-template-columns: 1fr; }
+            .section-header { flex-direction: column; align-items: stretch; }
+            .section-header .actions { justify-content: flex-start; }
+        }
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: var(--bg-body); }
+        ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: var(--accent); }
+    </style>
+</head>
+<body>
+
+<div class="app">
+    <!-- HEADER -->
+    <header class="header">
+        <div class="header-left">
+            <img id="ligaLogo" class="liga-logo" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='48' height='48'%3E%3Crect width='48' height='48' fill='%23cccccc'/%3E%3Ctext x='24' y='32' text-anchor='middle' font-family='Arial' font-size='20' fill='%23ffffff'%3ESP%3C/text%3E%3C/svg%3E" alt="Supercopa de Playa">
+            <h1>⚽ <span>Supercopa de Playa</span></h1>
+        </div>
+        <div class="header-controls">
+            <div class="theme-selector">
+                <button class="theme-btn active" data-theme="dark">🌙 Oscuro</button>
+                <button class="theme-btn" data-theme="light">☀️ Claro</button>
+                <button class="theme-btn" data-theme="green">🌿 Verde</button>
+            </div>
+            <button class="back-btn reset-btn" id="resetBtn">🗑️ Reset (debug)</button>
+            <button class="back-btn" id="backBtn">← Volver</button>
+            <button class="back-btn login-btn" id="loginBtn">🔐 Iniciar sesión</button>
+        </div>
+    </header>
+
+    <!-- TABLA GENERAL -->
+    <div id="standingsView" class="standings-container">
+        <div class="standings-title">📊 Tabla General <span id="jornadaSpan">Jornada 1</span></div>
+        <table class="standings-table" id="standingsTable">
+            <thead><tr><th>#</th><th>Equipo</th><th>PJ</th><th>G</th><th>E</th><th>P</th><th>GF</th><th>GC</th><th>DG</th><th>PTS</th></tr></thead>
+            <tbody id="standingsBody"></tbody>
+        </table>
+    </div>
+
+    <!-- GOLEADORES -->
+    <div id="scorersContainer">
+        <div class="scorers-title">⚽ Goleadores y Asistentes <span>Top</span></div>
+        <table class="scorers-table" id="scorersTable">
+            <thead><tr><th>#</th><th>Jugador</th><th>Equipo</th><th>Goles</th><th>Asistencias</th></tr></thead>
+            <tbody id="scorersBody"></tbody>
+        </table>
+    </div>
+
+    <!-- NOTICIAS -->
+    <div id="newsSection">
+        <div class="section-header">
+            <h2>📰 Noticias · Jornada 2</h2>
+            <div class="actions">
+                <button class="btn-add" id="addMatchBtn">+ Partido</button>
+                <button class="btn-add" id="addTransferBtn">+ Fichaje/Lesión</button>
+            </div>
+        </div>
+        <div class="news-grid" id="newsGrid"></div>
+        <div style="margin-top: 28px; border-top: 2px solid var(--border); padding-top: 20px;">
+            <div class="section-header" style="border-bottom: none; margin-bottom: 8px;">
+                <h2 style="font-size:1.2rem;">🔄 Fichajes · Renovaciones · Lesiones</h2>
+            </div>
+            <div class="transfer-grid" id="transfersGrid"></div>
+        </div>
+    </div>
+
+    <!-- DETALLE EQUIPO -->
+    <div id="teamDetailView" class="team-detail">
+        <div id="teamDetailContent"></div>
+    </div>
+
+    <!-- MODAL JUGADOR -->
+    <div class="player-modal" id="playerModal">
+        <div class="player-card">
+            <div class="shine" id="playerShine"></div>
+            <button class="close-modal" id="closePlayerModal">&times;</button>
+            <div class="player-avatar" id="playerAvatar">
+                <span class="initials" id="playerInitials">J</span>
+                <img id="playerAvatarImg" style="display:none; width:100%; height:100%; object-fit:cover;" alt="Foto">
+            </div>
+            <button class="upload-photo-btn" id="uploadPlayerPhotoBtn">📷 Subir foto</button>
+            <input type="file" id="playerPhotoInput" accept="image/*" style="display:none">
+            <div class="player-name" id="playerName">Jugador</div>
+            <div class="player-team" id="playerTeam">Equipo</div>
+            <div class="player-stats">
+                <div><div class="num" id="playerGoals">0</div><div class="label">Goles</div></div>
+                <div><div class="num" id="playerAssists">0</div><div class="label">Asistencias</div></div>
+            </div>
+            <div class="player-number" id="playerNumber">#0</div>
+        </div>
+    </div>
+
+    <!-- MODAL TRANSFERENCIA -->
+    <div class="transfer-modal-overlay" id="transferModal">
+        <div class="transfer-modal">
+            <button class="close-modal" id="closeTransferModal">&times;</button>
+            <img class="modal-img" id="transferModalImg" src="" alt="Imagen">
+            <div class="modal-club" id="transferModalClub">Club</div>
+            <div class="modal-player" id="transferModalPlayer">Jugador</div>
+            <div class="modal-type" id="transferModalType">Tipo</div>
+            <div class="modal-detail" id="transferModalDetail">Detalle</div>
+        </div>
+    </div>
+
+    <!-- MODAL NOTICIAS -->
+    <div class="modal-overlay" id="modalOverlay">
+        <div class="modal" id="modalContent">
+            <h3 id="modalTitle">Añadir noticia</h3>
+            <form id="modalForm">
+                <label>Tipo</label>
+                <select id="modalType">
+                    <option value="match">Partido</option>
+                    <option value="transfer">Fichaje/Lesión</option>
+                </select>
+                <div id="matchFields">
+                    <label>Local</label>
+                    <input type="text" id="modalLocal" placeholder="Ej: Juventus Playa" list="teamList" />
+                    <datalist id="teamList"></datalist>
+                    <label>Visitante</label>
+                    <input type="text" id="modalVisitor" placeholder="Ej: Redbull FC" list="teamList" />
+                    <label>Fecha</label>
+                    <input type="text" id="modalDate" placeholder="Ej: 20 jun 2026" />
+                    <label>Hora</label>
+                    <input type="text" id="modalTime" placeholder="Ej: 11:30" />
+                    <label>Imagen (subir archivo)</label>
+                    <input type="file" id="modalImgFile" accept="image/*" />
+                    <label>% Local (automático)</label>
+                    <input type="number" id="modalProbLocal" placeholder="45" min="0" max="100" readonly />
+                    <label>% Empate (automático)</label>
+                    <input type="number" id="modalProbEmpate" placeholder="30" min="0" max="100" readonly />
+                    <label>% Visitante (automático)</label>
+                    <input type="number" id="modalProbVisitante" placeholder="25" min="0" max="100" readonly />
+                </div>
+                <div id="transferFields" style="display:none;">
+                    <label>Club</label>
+                    <input type="text" id="modalClub" placeholder="Ej: Juventus Playa" list="teamList" />
+                    <label>Jugador</label>
+                    <input type="text" id="modalPlayer" placeholder="Ej: Xavier" />
+                    <label>Tipo</label>
+                    <input type="text" id="modalTransferType" placeholder="Ej: Renovación, Fichaje, Lesión..." />
+                    <label>Detalle</label>
+                    <textarea id="modalDetail" placeholder="Descripción breve"></textarea>
+                    <label>Imagen (subir archivo)</label>
+                    <input type="file" id="modalTransferImgFile" accept="image/*" />
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn-cancel" id="modalCancel">Cancelar</button>
+                    <button type="submit" class="btn-save">Guardar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL AÑADIR PARTIDO (LIGA / AMISTOSO) -->
+    <div class="fixture-modal-overlay" id="fixtureModalOverlay">
+        <div class="fixture-modal">
+            <h3 id="fixtureModalTitle">Añadir partido</h3>
+            <label>Rival</label>
+            <select id="fixtureOpponent"></select>
+            <label>Resultado (ej: 3-1)</label>
+            <input type="text" id="fixtureResult" placeholder="goles-goles" />
+            <label>Fecha (ej: 2025-06-20)</label>
+            <input type="text" id="fixtureDate" placeholder="AAAA-MM-DD" value="2025-06-20" />
+            <input type="hidden" id="fixtureType" value="liga" />
+            <div class="modal-actions">
+                <button class="btn-cancel" id="fixtureCancel">Cancelar</button>
+                <button class="btn-save" id="fixtureSave">Guardar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL LOGIN -->
+    <div class="login-modal-overlay" id="loginModalOverlay">
+        <div class="login-modal">
+            <h3>🔐 Iniciar sesión</h3>
+            <label>Usuario</label>
+            <input type="text" id="loginUser" placeholder="admin" value="admin" />
+            <label>Contraseña</label>
+            <input type="password" id="loginPass" placeholder="Contraseña" />
+            <div class="login-error" id="loginError"></div>
+            <div class="modal-actions">
+                <button class="btn-cancel" id="loginCancel">Cancelar</button>
+                <button class="btn-save" id="loginSubmit">Entrar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Inputs ocultos -->
+    <input type="file" id="logoUpload" accept="image/*" style="display:none" />
+    <input type="file" id="ligaLogoUpload" accept="image/*" style="display:none" />
+</div>
+
+<script>
+    // ================================================================
+    // CONFIGURACIÓN DEL BACKEND (¡CAMBIA ESTA URL POR LA DE RENDER!)
+    // ================================================================
+    const API_URL = 'https://supercopa-app.onrender.com/api/data';
+
+    // ================================================================
+    // DATOS POR DEFECTO (8 EQUIPOS COMPLETOS)
+    // ================================================================
+    const TEAM_COLORS = {
+        "Juventus Playa": { primary: "#808080", secondary: "#606060", text: "#fff" },
+        "Spurs La Lisa FC": { primary: "#000000", secondary: "#333333", text: "#fff" },
+        "Bastard München": { primary: "#CC0000", secondary: "#990000", text: "#fff" },
+        "Galácticos FC": { primary: "#990000", secondary: "#660000", text: "#fff" },
+        "Romanos FC": { primary: "#FF8C00", secondary: "#CC7000", text: "#fff" },
+        "FC Cubanacan": { primary: "#000080", secondary: "#000066", text: "#fff" },
+        "Redbull FC": { primary: "#FFFFFF", secondary: "#DDDDDD", text: "#000" },
+        "Marsella FC": { primary: "#4A90E2", secondary: "#2E6BB5", text: "#fff" }
+    };
+
+    const DEFAULT_DATA = {
+        teams: [
+            {
+                id: 1,
+                name: "Juventus Playa",
+                logo: null,
+                players: [
+                    { number: 30, name: "Dario", position: "Portero", goals: 0, assists: 0, img: null },
+                    { number: 1, name: "Samuel", position: "Portero", goals: 0, assists: 0, img: null },
+                    { number: 3, name: "Daniel", position: "Defensa", goals: 0, assists: 0, img: null },
+                    { number: 2, name: "Raul", position: "Defensa", goals: 0, assists: 0, img: null },
+                    { number: 19, name: "Dayan", position: "Defensa", goals: 0, assists: 0, img: null },
+                    { number: 17, name: "Muñoz", position: "Defensa", goals: 0, assists: 0, img: null },
+                    { number: 50, name: "Roldan", position: "Defensa", goals: 0, assists: 0, img: null },
+                    { number: 21, name: "Rafael", position: "Defensa", goals: 0, assists: 0, img: null },
+                    { number: 4, name: "Alain", position: "Defensa", goals: 0, assists: 0, img: null },
+                    { number: 80, name: "Frank", position: "Centrocampista", goals: 0, assists: 0, img: null },
+                    { number: 11, name: "Miguel", position: "Centrocampista", goals: 0, assists: 0, img: null },
+                    { number: 8, name: "Diego", position: "Centrocampista", goals: 0, assists: 0, img: null },
+                    { number: 15, name: "Dario", position: "Centrocampista", goals: 0, assists: 0, img: null },
+                    { number: 10, name: "Xavier", position: "Delantero", goals: 0, assists: 0, img: null },
+                    { number: 81, name: "Henry", position: "Delantero", goals: 0, assists: 0, img: null },
+                    { number: 9, name: "Camilo", position: "Delantero", goals: 0, assists: 0, img: null },
+                    { number: 7, name: "Brayan", position: "Delantero", goals: 0, assists: 0, img: null }
+                ],
+                fixtures: [{ opponent: "Bastard München", result: "5-2", type: "Liga", date: "2025-06-01" }],
+                friendlies: []
+            },
+            {
+                id: 2,
+                name: "Spurs La Lisa FC",
+                logo: null,
+                players: [
+                    { number: 1, name: "Portero1", position: "Portero", goals: 0, assists: 0, img: null },
+                    { number: 2, name: "Defensa1", position: "Defensa", goals: 0, assists: 0, img: null },
+                    { number: 3, name: "Defensa2", position: "Defensa", goals: 0, assists: 0, img: null },
+                    { number: 4, name: "Defensa3", position: "Defensa", goals: 0, assists: 0, img: null },
+                    { number: 5, name: "Centro1", position: "Centrocampista", goals: 0, assists: 0, img: null },
+                    { number: 6, name: "Centro2", position: "Centrocampista", goals: 0, assists: 0, img: null },
+                    { number: 7, name: "Centro3", position: "Centrocampista", goals: 0, assists: 0, img: null },
+                    { number: 8, name: "Delantero1", position: "Delantero", goals: 0, assists: 0, img: null },
+                    { number: 9, name: "Delantero2", position: "Delantero", goals: 0, assists: 0, img: null },
+                    { number: 10, name: "Delantero3", position: "Delantero", goals: 0, assists: 0, img: null }
+                ],
+                fixtures: [],
+                friendlies: []
+            },
+            {
+                id: 3,
+                name: "Bastard München",
+                logo: null,
+                players: [
+                    { number: 1, name: "Portero1", position: "Portero", goals: 0, assists: 0, img: null },
+                    { number: 2, name: "Defensa1", position: "Defensa", goals: 0, assists: 0, img: null },
+                    { number: 3, name: "Defensa2", position: "Defensa", goals: 0, assists: 0, img: null },
+                    { number: 4, name: "Defensa3", position: "Defensa", goals: 0, assists: 0, img: null },
+                    { number: 5, name: "Centro1", position: "Centrocampista", goals: 0, assists: 0, img: null },
+                    { number: 6, name: "Centro2", position: "Centrocampista", goals: 0, assists: 0, img: null },
+                    { number: 7, name: "Centro3", position: "Centrocampista", goals: 0, assists: 0, img: null },
+                    { number: 8, name: "Delantero1", position: "Delantero", goals: 0, assists: 0, img: null },
+                    { number: 9, name: "Delantero2", position: "Delantero", goals: 0, assists: 0, img: null },
+                    { number: 10, name: "Delantero3", position: "Delantero", goals: 0, assists: 0, img: null }
+                ],
+                fixtures: [],
+                friendlies: []
+            },
+            {
+                id: 4,
+                name: "Galácticos FC",
+                logo: null,
+                players: [
+                    { number: 1, name: "Portero1", position: "Portero", goals: 0, assists: 0, img: null },
+                    { number: 2, name: "Defensa1", position: "Defensa", goals: 0, assists: 0, img: null },
+                    { number: 3, name: "Defensa2", position: "Defensa", goals: 0, assists: 0, img: null },
+                    { number: 4, name: "Defensa3", position: "Defensa", goals: 0, assists: 0, img: null },
+                    { number: 5, name: "Centro1", position: "Centrocampista", goals: 0, assists: 0, img: null },
+                    { number: 6, name: "Centro2", position: "Centrocampista", goals: 0, assists: 0, img: null },
+                    { number: 7, name: "Centro3", position: "Centrocampista", goals: 0, assists: 0, img: null },
+                    { number: 8, name: "Delantero1", position: "Delantero", goals: 0, assists: 0, img: null },
+                    { number: 9, name: "Delantero2", position: "Delantero", goals: 0, assists: 0, img: null },
+                    { number: 10, name: "Delantero3", position: "Delantero", goals: 0, assists: 0, img: null }
+                ],
+                fixtures: [],
+                friendlies: []
+            },
+            {
+                id: 5,
+                name: "Romanos FC",
+                logo: null,
+                players: [
+                    { number: 1, name: "Portero1", position: "Portero", goals: 0, assists: 0, img: null },
+                    { number: 2, name: "Defensa1", position: "Defensa", goals: 0, assists: 0, img: null },
+                    { number: 3, name: "Defensa2", position: "Defensa", goals: 0, assists: 0, img: null },
+                    { number: 4, name: "Defensa3", position: "Defensa", goals: 0, assists: 0, img: null },
+                    { number: 5, name: "Centro1", position: "Centrocampista", goals: 0, assists: 0, img: null },
+                    { number: 6, name: "Centro2", position: "Centrocampista", goals: 0, assists: 0, img: null },
+                    { number: 7, name: "Centro3", position: "Centrocampista", goals: 0, assists: 0, img: null },
+                    { number: 8, name: "Delantero1", position: "Delantero", goals: 0, assists: 0, img: null },
+                    { number: 9, name: "Delantero2", position: "Delantero", goals: 0, assists: 0, img: null },
+                    { number: 10, name: "Delantero3", position: "Delantero", goals: 0, assists: 0, img: null }
+                ],
+                fixtures: [],
+                friendlies: []
+            },
+            {
+                id: 6,
+                name: "FC Cubanacan",
+                logo: null,
+                players: [
+                    { number: 1, name: "Portero1", position: "Portero", goals: 0, assists: 0, img: null },
+                    { number: 2, name: "Defensa1", position: "Defensa", goals: 0, assists: 0, img: null },
+                    { number: 3, name: "Defensa2", position: "Defensa", goals: 0, assists: 0, img: null },
+                    { number: 4, name: "Defensa3", position: "Defensa", goals: 0, assists: 0, img: null },
+                    { number: 5, name: "Centro1", position: "Centrocampista", goals: 0, assists: 0, img: null },
+                    { number: 6, name: "Centro2", position: "Centrocampista", goals: 0, assists: 0, img: null },
+                    { number: 7, name: "Centro3", position: "Centrocampista", goals: 0, assists: 0, img: null },
+                    { number: 8, name: "Delantero1", position: "Delantero", goals: 0, assists: 0, img: null },
+                    { number: 9, name: "Delantero2", position: "Delantero", goals: 0, assists: 0, img: null },
+                    { number: 10, name: "Delantero3", position: "Delantero", goals: 0, assists: 0, img: null }
+                ],
+                fixtures: [],
+                friendlies: []
+            },
+            {
+                id: 7,
+                name: "Redbull FC",
+                logo: null,
+                players: [
+                    { number: 1, name: "Portero1", position: "Portero", goals: 0, assists: 0, img: null },
+                    { number: 2, name: "Defensa1", position: "Defensa", goals: 0, assists: 0, img: null },
+                    { number: 3, name: "Defensa2", position: "Defensa", goals: 0, assists: 0, img: null },
+                    { number: 4, name: "Defensa3", position: "Defensa", goals: 0, assists: 0, img: null },
+                    { number: 5, name: "Centro1", position: "Centrocampista", goals: 0, assists: 0, img: null },
+                    { number: 6, name: "Centro2", position: "Centrocampista", goals: 0, assists: 0, img: null },
+                    { number: 7, name: "Centro3", position: "Centrocampista", goals: 0, assists: 0, img: null },
+                    { number: 8, name: "Delantero1", position: "Delantero", goals: 0, assists: 0, img: null },
+                    { number: 9, name: "Delantero2", position: "Delantero", goals: 0, assists: 0, img: null },
+                    { number: 10, name: "Delantero3", position: "Delantero", goals: 0, assists: 0, img: null }
+                ],
+                fixtures: [],
+                friendlies: []
+            },
+            {
+                id: 8,
+                name: "Marsella FC",
+                logo: null,
+                players: [
+                    { number: 1, name: "Portero1", position: "Portero", goals: 0, assists: 0, img: null },
+                    { number: 2, name: "Defensa1", position: "Defensa", goals: 0, assists: 0, img: null },
+                    { number: 3, name: "Defensa2", position: "Defensa", goals: 0, assists: 0, img: null },
+                    { number: 4, name: "Defensa3", position: "Defensa", goals: 0, assists: 0, img: null },
+                    { number: 5, name: "Centro1", position: "Centrocampista", goals: 0, assists: 0, img: null },
+                    { number: 6, name: "Centro2", position: "Centrocampista", goals: 0, assists: 0, img: null },
+                    { number: 7, name: "Centro3", position: "Centrocampista", goals: 0, assists: 0, img: null },
+                    { number: 8, name: "Delantero1", position: "Delantero", goals: 0, assists: 0, img: null },
+                    { number: 9, name: "Delantero2", position: "Delantero", goals: 0, assists: 0, img: null },
+                    { number: 10, name: "Delantero3", position: "Delantero", goals: 0, assists: 0, img: null }
+                ],
+                fixtures: [],
+                friendlies: []
+            }
+        ],
+        news: { matches: [], transfers: [] }
+    };
+
+    // ================================================================
+    // VARIABLES GLOBALES
+    // ================================================================
+    let ligaData = null;
+    let isAdmin = false;
+    let currentTeamId = null;
+    let currentPlayerForModal = null;
+    let currentTeamNameForModal = null;
+
+    // ================================================================
+    // FUNCIONES DE PERSISTENCIA (conectadas al backend)
+    // ================================================================
+    async function loadData() {
+        try {
+            const response = await fetch(API_URL);
+            if (!response.ok) throw new Error('Error al cargar datos');
+            const data = await response.json();
+            if (data && data.teams) {
+                ligaData = data;
+                return data;
+            } else {
+                // Si no hay datos, creamos la estructura por defecto
+                const defaultData = JSON.parse(JSON.stringify(DEFAULT_DATA));
+                await saveData(defaultData);
+                ligaData = defaultData;
+                return defaultData;
+            }
+        } catch (error) {
+            console.error('Error conectando con servidor:', error);
+            alert('⚠️ No se pudo conectar al servidor. Asegúrate de que el backend esté activo.');
+            // Fallback: datos locales (solo lectura)
+            if (!ligaData) {
+                ligaData = JSON.parse(JSON.stringify(DEFAULT_DATA));
+            }
+            return ligaData;
+        }
+    }
+
+    async function saveData(data) {
+        try {
+            const response = await fetch(API_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            });
+            if (!response.ok) throw new Error('Error al guardar');
+            ligaData = data;
+            return await response.json();
+        } catch (error) {
+            console.error('Error guardando en servidor:', error);
+            alert('❌ Error al guardar los cambios en el servidor.');
+        }
+    }
+
+    // ================================================================
+    // FUNCIONES DE ESTADÍSTICAS
+    // ================================================================
+    function computeStats(team) {
+        let wins = 0, draws = 0, losses = 0, gf = 0, gc = 0;
+        (team.fixtures || []).forEach(f => {
+            if (!f.result) return;
+            const parts = f.result.split('-').map(s => parseInt(s.trim()));
+            if (parts.length === 2) {
+                const [local, visit] = parts;
+                gf += local; gc += visit;
+                if (local > visit) wins++;
+                else if (local === visit) draws++;
+                else losses++;
+            }
+        });
+        const matches = wins + draws + losses;
+        const points = wins * 3 + draws * 1;
+        const gd = gf - gc;
+        return { wins, draws, losses, gf, gc, matches, points, gd };
+    }
+
+    function recalcAllTeams() {
+        ligaData.teams.forEach(team => {
+            const s = computeStats(team);
+            Object.assign(team, s);
+        });
+    }
+
+    function calcularJornada() {
+        let minMatches = Infinity;
+        ligaData.teams.forEach(t => {
+            if (t.matches < minMatches) minMatches = t.matches;
+        });
+        return minMatches === Infinity ? 1 : minMatches + 1;
+    }
+
+    // ================================================================
+    // RENDER STANDINGS
+    // ================================================================
+    function renderStandings() {
+        const sorted = [...ligaData.teams].sort((a,b) => b.points - a.points || b.gd - a.gd);
+        const tbody = document.getElementById('standingsBody');
+        tbody.innerHTML = '';
+        sorted.forEach((team, idx) => {
+            const tr = document.createElement('tr');
+            tr.dataset.teamId = team.id;
+            const gdClass = team.gd > 0 ? 'positive' : (team.gd < 0 ? 'negative' : '');
+            const initial = team.name.charAt(0).toUpperCase();
+            const color = TEAM_COLORS[team.name]?.primary || '#666';
+            const textColor = TEAM_COLORS[team.name]?.text || '#fff';
+            const logoHtml = team.logo ?
+                `<img src="${team.logo}" class="team-logo" style="border-color:${color}" alt="logo" />` :
+                `<div class="team-logo" style="background:${color};color:${textColor}">${initial}</div>`;
+            tr.innerHTML = `
+                <td class="pos">${idx + 1}</td>
+                <td><div class="team-name">${logoHtml} ${team.name}</div></td>
+                <td>${team.matches || 0}</td>
+                <td>${team.wins || 0}</td>
+                <td>${team.draws || 0}</td>
+                <td>${team.losses || 0}</td>
+                <td>${team.gf || 0}</td>
+                <td>${team.gc || 0}</td>
+                <td class="gd ${gdClass}">${team.gd > 0 ? '+' : ''}${team.gd || 0}</td>
+                <td class="pts">${team.points || 0}</td>
+            `;
+            tr.addEventListener('click', () => showTeamDetail(team.id));
+            tbody.appendChild(tr);
+        });
+        document.getElementById('jornadaSpan').textContent = `Jornada ${calcularJornada()}`;
+    }
+
+    // ================================================================
+    // RENDER GOLEADORES
+    // ================================================================
+    function renderScorers() {
+        const allPlayers = [];
+        ligaData.teams.forEach(team => {
+            (team.players || []).forEach(p => {
+                if (p.goals > 0 || p.assists > 0) {
+                    allPlayers.push({ name: p.name, team: team.name, goals: p.goals || 0, assists: p.assists || 0 });
+                }
+            });
+        });
+        allPlayers.sort((a,b) => b.goals - a.goals || b.assists - a.assists);
+        const tbody = document.getElementById('scorersBody');
+        tbody.innerHTML = '';
+        if (allPlayers.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="5" style="text-align:center;padding:20px;color:var(--text-muted);">Aún no hay goles ni asistencias registrados.</td></tr>`;
+            return;
+        }
+        allPlayers.forEach((p, idx) => {
+            const tr = document.createElement('tr');
+            tr.innerHTML = `<td class="pos">${idx + 1}</td><td><strong>${p.name}</strong></td><td>${p.team}</td><td>${p.goals}</td><td>${p.assists}</td>`;
+            tbody.appendChild(tr);
+        });
+    }
+
+    // ================================================================
+    // RENDER NOTICIAS Y TRANSFERENCIAS
+    // ================================================================
+    function renderNews() {
+        const grid = document.getElementById('newsGrid');
+        grid.innerHTML = '';
+        ligaData.news.matches.forEach((m, index) => {
+            const colorLocal = TEAM_COLORS[m.local]?.primary || '#666';
+            const colorVisit = TEAM_COLORS[m.visitante]?.primary || '#666';
+            const card = document.createElement('div');
+            card.className = 'news-card';
+            const imgSrc = m.img || 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="640" height="360"%3E%3Crect width="640" height="360" fill="%23cccccc"/%3E%3Ctext x="320" y="190" text-anchor="middle" font-family="Arial" font-size="24" fill="%23ffffff"%3EPartido%3C/text%3E%3C/svg%3E';
+            card.innerHTML = `
+                <button class="delete-news" data-index="${index}" data-type="match">✕</button>
+                <img class="news-img" src="${imgSrc}" alt="Partido" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'640\' height=\'360\'%3E%3Crect width=\'640\' height=\'360\' fill=\'%23cccccc\'/%3E%3Ctext x=\'320\' y=\'190\' text-anchor=\'middle\' font-family=\'Arial\' font-size=\'24\' fill=\'%23ffffff\'%3EPartido%3C/text%3E%3C/svg%3E'">
+                <div class="news-body">
+                    <div class="match">⚽ ${m.local} vs ${m.visitante}</div>
+                    <div class="datetime">📅 ${m.fecha} · ⏰ ${m.hora}</div>
+                    <div class="prediction-bar">
+                        <div class="bar-container">
+                            <div class="bar-segment" style="width:${m.probLocal}%; background:${colorLocal};">${m.probLocal}%</div>
+                            <div class="bar-segment" style="width:${m.probEmpate}%; background:#888;">${m.probEmpate}%</div>
+                            <div class="bar-segment" style="width:${m.probVisitante}%; background:${colorVisit};">${m.probVisitante}%</div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            grid.appendChild(card);
+        });
+
+        const tgrid = document.getElementById('transfersGrid');
+        tgrid.innerHTML = '';
+        ligaData.news.transfers.forEach((t, index) => {
+            const card = document.createElement('div');
+            card.className = 'transfer-card';
+            const imgSrc = t.img || null;
+            card.innerHTML = `
+                <button class="delete-transfer" data-index="${index}" data-type="transfer">✕</button>
+                ${imgSrc ? `<img class="transfer-img" src="${imgSrc}" alt="Imagen" onerror="this.style.display='none'">` : ''}
+                <div class="club">${t.club}</div>
+                <div class="player">${t.player}</div>
+                <div class="type">${t.type}</div>
+                <div class="detail">${t.detail}</div>
+            `;
+            card.addEventListener('click', function(e) {
+                if (e.target.closest('.delete-transfer')) return;
+                openTransferModal(t);
+            });
+            tgrid.appendChild(card);
+        });
+
+        document.querySelectorAll('.delete-news').forEach(btn => {
+            btn.addEventListener('click', function(e) {
+                e.stopPropagation();
+                const idx = parseInt(this.dataset.index);
+                const type = this.dataset.type;
+                if (type === 'match') ligaData.news.matches.splice(idx, 1);
+                saveData(ligaData);
+                renderNews();
+            });
+        });
+        document.querySelectorAll('.delete-transfer').forEach(btn => {
+            btn.addEventListener('click', function(e) {
+                e.stopPropagation();
+                const idx = parseInt(this.dataset.index);
+                const type = this.dataset.type;
+                if (type === 'transfer') ligaData.news.transfers.splice(idx, 1);
+                saveData(ligaData);
+                renderNews();
+            });
+        });
+    }
+
+    // ================================================================
+    // MODAL TRANSFERENCIA
+    // ================================================================
+    function openTransferModal(transfer) {
+        document.getElementById('transferModalImg').src = transfer.img || 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="400" height="200"%3E%3Crect width="400" height="200" fill="%23cccccc"/%3E%3Ctext x="200" y="110" text-anchor="middle" font-family="Arial" font-size="20" fill="%23ffffff"%3ESin imagen%3C/text%3E%3C/svg%3E';
+        document.getElementById('transferModalClub').textContent = transfer.club || '';
+        document.getElementById('transferModalPlayer').textContent = transfer.player || '';
+        document.getElementById('transferModalType').textContent = transfer.type || '';
+        document.getElementById('transferModalDetail').textContent = transfer.detail || '';
+        document.getElementById('transferModal').classList.add('active');
+    }
+
+    document.getElementById('closeTransferModal').addEventListener('click', function() {
+        document.getElementById('transferModal').classList.remove('active');
+    });
+    document.getElementById('transferModal').addEventListener('click', function(e) {
+        if (e.target === this) this.classList.remove('active');
+    });
+
+    // ================================================================
+    // FUNCIÓN DE PORCENTAJES
+    // ================================================================
+    function calculateProbabilities(team1Name, team2Name) {
+        const team1 = ligaData.teams.find(t => t.name === team1Name);
+        const team2 = ligaData.teams.find(t => t.name === team2Name);
+        if (!team1 || !team2) return { local: 33, draw: 34, visitor: 33 };
+
+        const m1 = team1.matches || 0;
+        const m2 = team2.matches || 0;
+        const gf1 = team1.gf || 0;
+        const gc1 = team1.gc || 0;
+        const gf2 = team2.gf || 0;
+        const gc2 = team2.gc || 0;
+
+        const avgGF1 = m1 > 0 ? gf1 / m1 : 0.5;
+        const avgGC1 = m1 > 0 ? gc1 / m1 : 0.5;
+        const avgGF2 = m2 > 0 ? gf2 / m2 : 0.5;
+        const avgGC2 = m2 > 0 ? gc2 / m2 : 0.5;
+
+        const sumGoals1 = team1.players.reduce((sum, p) => sum + (p.goals || 0), 0);
+        const sumAssists1 = team1.players.reduce((sum, p) => sum + (p.assists || 0), 0);
+        const sumGoals2 = team2.players.reduce((sum, p) => sum + (p.goals || 0), 0);
+        const sumAssists2 = team2.players.reduce((sum, p) => sum + (p.assists || 0), 0);
+
+        const playerFactor1 = (sumGoals1 * 1.2 + sumAssists1 * 0.8) / (m1 || 1);
+        const playerFactor2 = (sumGoals2 * 1.2 + sumAssists2 * 0.8) / (m2 || 1);
+
+        const fuerza1 = (avgGF1 - avgGC1) + playerFactor1 * 0.3;
+        const fuerza2 = (avgGF2 - avgGC2) + playerFactor2 * 0.3;
+        const diff = fuerza1 - fuerza2;
+
+        const pDraw = 0.25 + 0.15 * Math.exp(-Math.abs(diff) * 0.7);
+        const k = 0.6;
+        const p1 = (1 - pDraw) / (1 + Math.exp(-k * diff));
+        const p2 = 1 - pDraw - p1;
+
+        let pd = Math.round(pDraw * 100);
+        pd = Math.max(0, Math.min(100, pd));
+        let pl = Math.round(p1 * 100);
+        let pv = 100 - pd - pl;
+        pl = Math.max(0, Math.min(100, pl));
+        pv = Math.max(0, Math.min(100, pv));
+        pd = 100 - pl - pv;
+        return { local: pl, draw: pd, visitor: pv };
+    }
+
+    function updateProbabilities() {
+        const local = document.getElementById('modalLocal').value.trim();
+        const visitor = document.getElementById('modalVisitor').value.trim();
+        if (local && visitor) {
+            const probs = calculateProbabilities(local, visitor);
+            document.getElementById('modalProbLocal').value = probs.local;
+            document.getElementById('modalProbEmpate').value = probs.draw;
+            document.getElementById('modalProbVisitante').value = probs.visitor;
+        }
+    }
+
+    // ================================================================
+    // RESET (debug)
+    // ================================================================
+    function resetAllExceptPlayers() {
+        if (!isAdmin) { alert('Debes ser administrador para realizar esta acción.'); return; }
+        if (!confirm('¿Estás seguro? Esto borrará todas las estadísticas y partidos, pero conservará los jugadores.')) return;
+        ligaData.teams.forEach(team => {
+            team.wins = 0;
+            team.draws = 0;
+            team.losses = 0;
+            team.gf = 0;
+            team.gc = 0;
+            team.matches = 0;
+            team.points = 0;
+            team.gd = 0;
+            team.fixtures = [];
+            team.friendlies = [];
+        });
+        saveData(ligaData);
+        recalcAllTeams();
+        renderStandings();
+        renderScorers();
+        renderNews();
+        if (currentTeamId) showTeamDetail(currentTeamId);
+        alert('Datos reseteados (jugadores conservados).');
+    }
+
+    // ================================================================
+    // MODAL NOTICIAS
+    // ================================================================
+    const modalOverlay = document.getElementById('modalOverlay');
+    const modalForm = document.getElementById('modalForm');
+    const modalType = document.getElementById('modalType');
+    const matchFields = document.getElementById('matchFields');
+    const transferFields = document.getElementById('transferFields');
+    let editingIndex = null, editingType = null;
+
+    function populateTeamList() {
+        const datalist = document.getElementById('teamList');
+        datalist.innerHTML = '';
+        ligaData.teams.forEach(t => {
+            const opt = document.createElement('option');
+            opt.value = t.name;
+            datalist.appendChild(opt);
+        });
+    }
+
+    function openModal(type, index = null) {
+        editingIndex = index;
+        editingType = type;
+        document.getElementById('modalTitle').textContent = index !== null ? 'Editar noticia' : 'Añadir noticia';
+        modalType.value = type || 'match';
+        toggleFields();
+        document.getElementById('modalImgFile').value = '';
+        document.getElementById('modalTransferImgFile').value = '';
+        if (type === 'match' || !type) {
+            if (index !== null) {
+                const m = ligaData.news.matches[index];
+                document.getElementById('modalLocal').value = m.local;
+                document.getElementById('modalVisitor').value = m.visitante;
+                document.getElementById('modalDate').value = m.fecha;
+                document.getElementById('modalTime').value = m.hora;
+                document.getElementById('modalProbLocal').value = m.probLocal;
+                document.getElementById('modalProbEmpate').value = m.probEmpate;
+                document.getElementById('modalProbVisitante').value = m.probVisitante;
+            } else {
+                document.getElementById('modalLocal').value = '';
+                document.getElementById('modalVisitor').value = '';
+                document.getElementById('modalDate').value = '';
+                document.getElementById('modalTime').value = '';
+                document.getElementById('modalProbLocal').value = 33;
+                document.getElementById('modalProbEmpate').value = 33;
+                document.getElementById('modalProbVisitante').value = 34;
+            }
+        } else {
+            if (index !== null) {
+                const t = ligaData.news.transfers[index];
+                document.getElementById('modalClub').value = t.club;
+                document.getElementById('modalPlayer').value = t.player;
+                document.getElementById('modalTransferType').value = t.type;
+                document.getElementById('modalDetail').value = t.detail;
+            } else {
+                document.getElementById('modalClub').value = '';
+                document.getElementById('modalPlayer').value = '';
+                document.getElementById('modalTransferType').value = '';
+                document.getElementById('modalDetail').value = '';
+            }
+        }
+        modalOverlay.classList.add('active');
+        populateTeamList();
+        if (type === 'match') updateProbabilities();
+    }
+
+    function closeModal() {
+        modalOverlay.classList.remove('active');
+        editingIndex = null;
+        editingType = null;
+    }
+
+    function toggleFields() {
+        const type = modalType.value;
+        matchFields.style.display = type === 'match' ? 'block' : 'none';
+        transferFields.style.display = type === 'transfer' ? 'block' : 'none';
+    }
+
+    modalType.addEventListener('change', toggleFields);
+    document.getElementById('modalLocal').addEventListener('input', updateProbabilities);
+    document.getElementById('modalVisitor').addEventListener('input', updateProbabilities);
+
+    modalForm.addEventListener('submit', async function(e) {
+        e.preventDefault();
+        const type = modalType.value;
+        if (type === 'match') {
+            const match = {
+                local: document.getElementById('modalLocal').value.trim(),
+                visitante: document.getElementById('modalVisitor').value.trim(),
+                fecha: document.getElementById('modalDate').value.trim(),
+                hora: document.getElementById('modalTime').value.trim(),
+                probLocal: parseInt(document.getElementById('modalProbLocal').value) || 33,
+                probEmpate: parseInt(document.getElementById('modalProbEmpate').value) || 33,
+                probVisitante: parseInt(document.getElementById('modalProbVisitante').value) || 34,
+                img: null
+            };
+            if (!match.local || !match.visitante) { alert('Completa local y visitante.'); return; }
+            const fileInput = document.getElementById('modalImgFile');
+            if (fileInput.files && fileInput.files[0]) {
+                const reader = new FileReader();
+                const imgData = await new Promise((resolve) => {
+                    reader.onload = async function(ev) {
+                        const compressed = await compressImage(ev.target.result, 400, 400, 0.6);
+                        resolve(compressed);
+                    };
+                    reader.readAsDataURL(fileInput.files[0]);
+                });
+                match.img = imgData;
+            }
+            if (editingIndex !== null && editingType === 'match') {
+                if (!match.img) match.img = ligaData.news.matches[editingIndex].img;
+                ligaData.news.matches[editingIndex] = match;
+            } else {
+                ligaData.news.matches.push(match);
+            }
+        } else {
+            const transfer = {
+                club: document.getElementById('modalClub').value.trim(),
+                player: document.getElementById('modalPlayer').value.trim(),
+                type: document.getElementById('modalTransferType').value.trim(),
+                detail: document.getElementById('modalDetail').value.trim(),
+                img: null
+            };
+            if (!transfer.club || !transfer.player) { alert('Completa club y jugador.'); return; }
+            const fileInput = document.getElementById('modalTransferImgFile');
+            if (fileInput.files && fileInput.files[0]) {
+                const reader = new FileReader();
+                const imgData = await new Promise((resolve) => {
+                    reader.onload = async function(ev) {
+                        const compressed = await compressImage(ev.target.result, 400, 400, 0.6);
+                        resolve(compressed);
+                    };
+                    reader.readAsDataURL(fileInput.files[0]);
+                });
+                transfer.img = imgData;
+            }
+            if (editingIndex !== null && editingType === 'transfer') {
+                if (!transfer.img) transfer.img = ligaData.news.transfers[editingIndex].img;
+                ligaData.news.transfers[editingIndex] = transfer;
+            } else {
+                ligaData.news.transfers.push(transfer);
+            }
+        }
+        saveData(ligaData);
+        renderNews();
+        closeModal();
+    });
+
+    document.getElementById('modalCancel').addEventListener('click', closeModal);
+    modalOverlay.addEventListener('click', function(e) { if (e.target === this) closeModal(); });
+    document.getElementById('addMatchBtn').addEventListener('click', () => openModal('match'));
+    document.getElementById('addTransferBtn').addEventListener('click', () => openModal('transfer'));
+
+    // ================================================================
+    // MODAL AÑADIR PARTIDO (LIGA / AMISTOSO)
+    // ================================================================
+    const fixtureModalOverlay = document.getElementById('fixtureModalOverlay');
+    const fixtureOpponent = document.getElementById('fixtureOpponent');
+    const fixtureResult = document.getElementById('fixtureResult');
+    const fixtureDate = document.getElementById('fixtureDate');
+    const fixtureType = document.getElementById('fixtureType');
+    let currentTeamIdForFixture = null;
+
+    function openFixtureModal(teamId, type) {
+        if (!isAdmin) { alert('Solo el administrador puede añadir partidos o amistosos.'); return; }
+        currentTeamIdForFixture = teamId;
+        const currentTeam = ligaData.teams.find(t => t.id === teamId);
+        fixtureOpponent.innerHTML = '';
+        ligaData.teams.forEach(t => {
+            if (t.id !== teamId) {
+                const opt = document.createElement('option');
+                opt.value = t.name;
+                opt.textContent = t.name;
+                fixtureOpponent.appendChild(opt);
+            }
+        });
+        fixtureResult.value = '';
+        fixtureDate.value = new Date().toISOString().split('T')[0];
+        fixtureType.value = type || 'liga';
+        document.getElementById('fixtureModalTitle').textContent = type === 'amistoso' ? 'Añadir amistoso' : 'Añadir partido';
+        fixtureModalOverlay.classList.add('active');
+    }
+
+    function closeFixtureModal() {
+        fixtureModalOverlay.classList.remove('active');
+        currentTeamIdForFixture = null;
+    }
+
+    document.getElementById('fixtureCancel').addEventListener('click', closeFixtureModal);
+    fixtureModalOverlay.addEventListener('click', function(e) {
+        if (e.target === this) closeFixtureModal();
+    });
+
+    document.getElementById('fixtureSave').addEventListener('click', function() {
+        if (!isAdmin) { alert('No tienes permiso.'); return; }
+        const opponentName = fixtureOpponent.value;
+        const result = fixtureResult.value.trim();
+        const date = fixtureDate.value.trim();
+        const type = fixtureType.value;
+        if (!opponentName) { alert('Selecciona un rival.'); return; }
+        if (!result || !/^\d+\s*-\s*\d+$/.test(result)) {
+            alert('Introduce el resultado en formato "goles-goles" (ej: 3-1).');
+            return;
+        }
+        const cleanResult = result.replace(/\s/g, '');
+        const parts = cleanResult.split('-').map(s => parseInt(s));
+        if (parts.length !== 2 || isNaN(parts[0]) || isNaN(parts[1])) {
+            alert('Resultado inválido. Usa formato "3-1".');
+            return;
+        }
+        const [golesLocal, golesVisitante] = parts;
+        const team = ligaData.teams.find(t => t.id === currentTeamIdForFixture);
+        const opponent = ligaData.teams.find(t => t.name === opponentName);
+        if (!team || !opponent) { alert('Error: equipo no encontrado.'); return; }
+
+        if (type === 'liga') {
+            team.fixtures.push({
+                opponent: opponentName,
+                result: cleanResult,
+                type: "Liga",
+                date: date || new Date().toISOString().split('T')[0]
+            });
+            opponent.fixtures.push({
+                opponent: team.name,
+                result: `${golesVisitante}-${golesLocal}`,
+                type: "Liga",
+                date: date || new Date().toISOString().split('T')[0]
+            });
+        } else {
+            if (!team.friendlies) team.friendlies = [];
+            if (!opponent.friendlies) opponent.friendlies = [];
+            team.friendlies.push({
+                opponent: opponentName,
+                result: cleanResult,
+                type: "Amistoso",
+                date: date || new Date().toISOString().split('T')[0]
+            });
+            opponent.friendlies.push({
+                opponent: team.name,
+                result: `${golesVisitante}-${golesLocal}`,
+                type: "Amistoso",
+                date: date || new Date().toISOString().split('T')[0]
+            });
+        }
+
+        saveData(ligaData);
+        recalcAllTeams();
+        renderStandings();
+        renderScorers();
+        if (currentTeamId) showTeamDetail(currentTeamId);
+        closeFixtureModal();
+        alert(type === 'liga' ? 'Partido añadido correctamente a ambos equipos.' : 'Amistoso añadido correctamente a ambos equipos.');
+    });
+
+    // ================================================================
+    // DETALLE EQUIPO
+    // ================================================================
+    function showTeamDetail(teamId) {
+        currentTeamId = teamId;
+        const team = ligaData.teams.find(t => t.id === teamId);
+        if (!team) return;
+        document.getElementById('standingsView').style.display = 'none';
+        document.getElementById('scorersContainer').style.display = 'none';
+        document.getElementById('newsSection').style.display = 'none';
+        const detail = document.getElementById('teamDetailView');
+        detail.classList.add('active');
+        const content = document.getElementById('teamDetailContent');
+        content.innerHTML = '';
+
+        // Header
+        const headerDiv = document.createElement('div');
+        headerDiv.className = 'team-header';
+        const initial = team.name.charAt(0).toUpperCase();
+        const color = TEAM_COLORS[team.name]?.primary || '#666';
+        const textColor = TEAM_COLORS[team.name]?.text || '#fff';
+        const logoHtml = team.logo ?
+            `<img src="${team.logo}" alt="logo" style="border-color:${color}" />` :
+            `<div class="logo-placeholder" style="background:${color};color:${textColor};">${initial}</div>`;
+        headerDiv.innerHTML = `
+            <div class="logo-wrapper">
+                ${logoHtml}
+                ${isAdmin ? `<button class="upload-btn" id="uploadLogoBtn">Subir escudo</button>` : ''}
+            </div>
+            <div class="info">
+                <h2 ${isAdmin ? 'contenteditable="true" id="teamNameEdit"' : ''}>${team.name}</h2>
+                <div class="stats-row">
+                    <span class="stat-item">🏆 Puntos: <strong>${team.points || 0}</strong></span>
+                    <span class="stat-item">⚽ GF: <strong>${team.gf || 0}</strong></span>
+                    <span class="stat-item">🧤 GC: <strong>${team.gc || 0}</strong></span>
+                    <span class="stat-item">📊 DG: <strong>${team.gd > 0 ? '+' : ''}${team.gd || 0}</strong></span>
+                    <span class="stat-item">📈 Partidos: <strong>${team.matches || 0}</strong></span>
+                </div>
+            </div>
+        `;
+        content.appendChild(headerDiv);
+
+        if (isAdmin) {
+            document.getElementById('teamNameEdit').addEventListener('blur', function() {
+                team.name = this.textContent;
+                saveData(ligaData);
+                renderStandings();
+                renderScorers();
+            });
+        }
+
+        if (isAdmin) {
+            const fileInput = document.getElementById('logoUpload');
+            document.getElementById('uploadLogoBtn').addEventListener('click', () => fileInput.click());
+            fileInput.onchange = async function(e) {
+                const file = e.target.files[0];
+                if (!file) return;
+                const reader = new FileReader();
+                reader.onload = async function(ev) {
+                    const compressed = await compressImage(ev.target.result, 64, 64, 0.5);
+                    team.logo = compressed;
+                    saveData(ligaData);
+                    showTeamDetail(teamId);
+                    renderStandings();
+                };
+                reader.readAsDataURL(file);
+                fileInput.value = '';
+            };
+        }
+
+        // Jugadores
+        const playersTitle = document.createElement('div');
+        playersTitle.className = 'section-title';
+        playersTitle.innerHTML = `🧑‍🤝‍🧑 Plantilla <span class="badge">${team.players.length} jugadores</span>`;
+        content.appendChild(playersTitle);
+
+        if (team.players.length) {
+            const table = document.createElement('table');
+            table.className = 'players-table';
+            let tbody = document.createElement('tbody');
+            team.players.forEach((p, idx) => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td class="number" ${isAdmin ? 'contenteditable="true" data-player-idx="'+idx+'" data-field="number"' : ''}>${p.number}</td>
+                    <td ${isAdmin ? 'contenteditable="true" data-player-idx="'+idx+'" data-field="name"' : ''}>${p.name}</td>
+                    <td><span class="position" ${isAdmin ? 'contenteditable="true" data-player-idx="'+idx+'" data-field="position"' : ''}>${p.position}</span></td>
+                    <td><span class="goals-assists"><span ${isAdmin ? 'contenteditable="true" data-player-idx="'+idx+'" data-field="goals"' : ''}>${p.goals}</span> G / <span ${isAdmin ? 'contenteditable="true" data-player-idx="'+idx+'" data-field="assists"' : ''}>${p.assists}</span> A</span></td>
+                `;
+                tr.addEventListener('click', function(e) {
+                    if (e.target.closest('[contenteditable]')) return;
+                    const idx = parseInt(this.querySelector('[data-player-idx]')?.dataset.playerIdx);
+                    if (!isNaN(idx)) {
+                        const player = team.players[idx];
+                        openPlayerModal(player, team.name);
+                    }
+                });
+                if (isAdmin) {
+                    tr.querySelectorAll('[contenteditable]').forEach(cell => {
+                        cell.addEventListener('blur', function() {
+                            const idx = parseInt(this.dataset.playerIdx);
+                            const field = this.dataset.field;
+                            let val = this.textContent;
+                            if (['number','goals','assists'].includes(field)) val = parseInt(val) || 0;
+                            if (!isNaN(idx) && field) {
+                                team.players[idx][field] = val;
+                                saveData(ligaData);
+                                renderScorers();
+                            }
+                        });
+                    });
+                }
+                tbody.appendChild(tr);
+            });
+            table.appendChild(tbody);
+            content.appendChild(table);
+        }
+
+        if (isAdmin) {
+            const addPlayerBtn = document.createElement('button');
+            addPlayerBtn.textContent = '+ Añadir jugador';
+            addPlayerBtn.className = 'back-btn';
+            addPlayerBtn.style.marginTop = '12px';
+            addPlayerBtn.addEventListener('click', function() {
+                team.players.push({ number: 0, name: 'Nuevo', position: 'Defensa', goals: 0, assists: 0, img: null });
+                saveData(ligaData);
+                showTeamDetail(teamId);
+                renderScorers();
+            });
+            content.appendChild(addPlayerBtn);
+        }
+
+        // Partidos de Liga
+        const fixTitle = document.createElement('div');
+        fixTitle.className = 'section-title';
+        fixTitle.innerHTML = `📅 Partidos de Liga <span class="badge">${team.fixtures.length}</span>`;
+        content.appendChild(fixTitle);
+
+        if (isAdmin) {
+            const addFixtureBtn = document.createElement('button');
+            addFixtureBtn.textContent = '+ Añadir partido';
+            addFixtureBtn.className = 'back-btn';
+            addFixtureBtn.style.marginTop = '12px';
+            addFixtureBtn.addEventListener('click', function() {
+                openFixtureModal(teamId, 'liga');
+            });
+            content.appendChild(addFixtureBtn);
+        }
+
+        if (team.fixtures.length) {
+            const grid = document.createElement('div');
+            grid.className = 'fixtures-grid';
+            team.fixtures.forEach((f, idx) => {
+                const card = document.createElement('div');
+                card.className = 'fixture-card';
+                card.innerHTML = `
+                    <div class="opponent">
+                        <span ${isAdmin ? 'contenteditable="true" data-fixture-idx="'+idx+'" data-field="opponent"' : ''}>vs ${f.opponent}</span>
+                        <span class="result" ${isAdmin ? 'contenteditable="true" data-fixture-idx="'+idx+'" data-field="result"' : ''}>${f.result}</span>
+                    </div>
+                    <div class="type" ${isAdmin ? 'contenteditable="true" data-fixture-idx="'+idx+'" data-field="type"' : ''}>${f.type}</div>
+                    <div class="date" ${isAdmin ? 'contenteditable="true" data-fixture-idx="'+idx+'" data-field="date"' : ''}>${f.date}</div>
+                `;
+                if (isAdmin) {
+                    card.querySelectorAll('[contenteditable]').forEach(el => {
+                        el.addEventListener('blur', function() {
+                            const idx = parseInt(this.dataset.fixtureIdx);
+                            const field = this.dataset.field;
+                            if (!isNaN(idx) && field) {
+                                team.fixtures[idx][field] = this.textContent;
+                                saveData(ligaData);
+                                recalcAllTeams();
+                                renderStandings();
+                                renderScorers();
+                            }
+                        });
+                    });
+                }
+                grid.appendChild(card);
+            });
+            content.appendChild(grid);
+        } else {
+            const msg = document.createElement('p');
+            msg.textContent = 'No hay partidos registrados.';
+            content.appendChild(msg);
+        }
+
+        // Amistosos
+        const friendTitle = document.createElement('div');
+        friendTitle.className = 'section-title';
+        friendTitle.innerHTML = `🤝 Amistosos <span class="badge">${team.friendlies ? team.friendlies.length : 0}</span>`;
+        content.appendChild(friendTitle);
+
+        if (isAdmin) {
+            const addFriendlyBtn = document.createElement('button');
+            addFriendlyBtn.textContent = '+ Añadir amistoso';
+            addFriendlyBtn.className = 'back-btn';
+            addFriendlyBtn.style.marginTop = '12px';
+            addFriendlyBtn.addEventListener('click', function() {
+                openFixtureModal(teamId, 'amistoso');
+            });
+            content.appendChild(addFriendlyBtn);
+        }
+
+        if (team.friendlies && team.friendlies.length) {
+            const grid = document.createElement('div');
+            grid.className = 'fixtures-grid';
+            team.friendlies.forEach((f, idx) => {
+                const card = document.createElement('div');
+                card.className = 'fixture-card';
+                card.innerHTML = `
+                    <div class="opponent">
+                        <span ${isAdmin ? 'contenteditable="true" data-friendly-idx="'+idx+'" data-field="opponent"' : ''}>vs ${f.opponent}</span>
+                        <span class="result" ${isAdmin ? 'contenteditable="true" data-friendly-idx="'+idx+'" data-field="result"' : ''}>${f.result}</span>
+                    </div>
+                    <div class="type" ${isAdmin ? 'contenteditable="true" data-friendly-idx="'+idx+'" data-field="type"' : ''}>${f.type}</div>
+                    <div class="date" ${isAdmin ? 'contenteditable="true" data-friendly-idx="'+idx+'" data-field="date"' : ''}>${f.date}</div>
+                `;
+                if (isAdmin) {
+                    card.querySelectorAll('[contenteditable]').forEach(el => {
+                        el.addEventListener('blur', function() {
+                            const idx = parseInt(this.dataset.friendlyIdx);
+                            const field = this.dataset.field;
+                            if (!isNaN(idx) && field) {
+                                team.friendlies[idx][field] = this.textContent;
+                                saveData(ligaData);
+                                showTeamDetail(teamId);
+                            }
+                        });
+                    });
+                }
+                grid.appendChild(card);
+            });
+            content.appendChild(grid);
+        } else {
+            const msg = document.createElement('p');
+            msg.textContent = 'No hay amistosos registrados.';
+            content.appendChild(msg);
+        }
+
+        if (isAdmin) {
+            const delBtn = document.createElement('button');
+            delBtn.textContent = '🗑️ Eliminar equipo';
+            delBtn.className = 'back-btn';
+            delBtn.style.marginTop = '20px';
+            delBtn.style.background = '#dc2626';
+            delBtn.style.color = 'white';
+            delBtn.style.borderColor = '#dc2626';
+            delBtn.addEventListener('click', function() {
+                if (confirm(`¿Eliminar ${team.name}?`)) {
+                    ligaData.teams = ligaData.teams.filter(t => t.id !== teamId);
+                    saveData(ligaData);
+                    recalcAllTeams();
+                    goToStandings();
+                }
+            });
+            content.appendChild(delBtn);
+        }
+    }
+
+    // ================================================================
+    // MODAL JUGADOR (con foto)
+    // ================================================================
+    function openPlayerModal(player, teamName) {
+        currentPlayerForModal = player;
+        currentTeamNameForModal = teamName;
+
+        document.getElementById('playerName').textContent = player.name;
+        document.getElementById('playerTeam').textContent = teamName;
+        document.getElementById('playerGoals').textContent = player.goals || 0;
+        document.getElementById('playerAssists').textContent = player.assists || 0;
+        document.getElementById('playerNumber').textContent = '#' + (player.number || 0);
+
+        const initials = document.getElementById('playerInitials');
+        const img = document.getElementById('playerAvatarImg');
+        if (player.img) {
+            img.src = player.img;
+            img.style.display = 'block';
+            initials.style.display = 'none';
+        } else {
+            img.style.display = 'none';
+            initials.style.display = 'flex';
+            initials.textContent = player.name.charAt(0).toUpperCase();
+        }
+
+        document.getElementById('playerShine').classList.add('active');
+        document.getElementById('playerModal').classList.add('active');
+    }
+
+    function closePlayerModal() {
+        document.getElementById('playerShine').classList.remove('active');
+        document.getElementById('playerModal').classList.remove('active');
+        currentPlayerForModal = null;
+        currentTeamNameForModal = null;
+    }
+
+    document.getElementById('closePlayerModal').addEventListener('click', closePlayerModal);
+    document.getElementById('playerModal').addEventListener('click', function(e) {
+        if (e.target === this) closePlayerModal();
+    });
+
+    document.getElementById('uploadPlayerPhotoBtn').addEventListener('click', function() {
+        document.getElementById('playerPhotoInput').click();
+    });
+    document.getElementById('playerAvatar').addEventListener('click', function() {
+        document.getElementById('playerPhotoInput').click();
+    });
+
+    document.getElementById('playerPhotoInput').addEventListener('change', async function(e) {
+        const file = e.target.files[0];
+        if (!file || !currentPlayerForModal) return;
+        const reader = new FileReader();
+        reader.onload = async function(ev) {
+            const compressed = await compressImage(ev.target.result, 200, 200, 0.6);
+            const team = ligaData.teams.find(t => t.name === currentTeamNameForModal);
+            if (team) {
+                const player = team.players.find(p => p.name === currentPlayerForModal.name && p.number === currentPlayerForModal.number);
+                if (player) {
+                    player.img = compressed;
+                    currentPlayerForModal.img = compressed;
+                    saveData(ligaData);
+                    const img = document.getElementById('playerAvatarImg');
+                    img.src = compressed;
+                    img.style.display = 'block';
+                    document.getElementById('playerInitials').style.display = 'none';
+                }
+            }
+        };
+        reader.readAsDataURL(file);
+        this.value = '';
+    });
+
+    // ================================================================
+    // NAVEGACIÓN
+    // ================================================================
+    function goToStandings() {
+        document.getElementById('standingsView').style.display = 'block';
+        document.getElementById('scorersContainer').style.display = 'block';
+        document.getElementById('newsSection').style.display = 'block';
+        document.getElementById('teamDetailView').classList.remove('active');
+        currentTeamId = null;
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        renderStandings();
+        renderScorers();
+        renderNews();
+    }
+
+    document.getElementById('backBtn').addEventListener('click', goToStandings);
+
+    // ================================================================
+    // LOGIN / LOGOUT
+    // ================================================================
+    function checkLoginStatus() {
+        const saved = sessionStorage.getItem('isAdmin');
+        if (saved === 'true') {
+            isAdmin = true;
+            document.getElementById('loginBtn').textContent = '🔓 Cerrar sesión';
+            document.getElementById('loginBtn').classList.remove('login-btn');
+            document.getElementById('loginBtn').classList.add('admin-btn');
+        } else {
+            isAdmin = false;
+            document.getElementById('loginBtn').textContent = '🔐 Iniciar sesión';
+            document.getElementById('loginBtn').classList.remove('admin-btn');
+            document.getElementById('loginBtn').classList.add('login-btn');
+        }
+        // Refrescar vista si estamos en detalle
+        if (document.getElementById('teamDetailView').classList.contains('active') && currentTeamId) {
+            showTeamDetail(currentTeamId);
+        } else {
+            renderStandings();
+            renderScorers();
+            renderNews();
+        }
+    }
+
+    document.getElementById('loginBtn').addEventListener('click', function() {
+        if (isAdmin) {
+            sessionStorage.removeItem('isAdmin');
+            isAdmin = false;
+            checkLoginStatus();
+            alert('Sesión cerrada.');
+            goToStandings();
+        } else {
+            document.getElementById('loginUser').value = 'admin';
+            document.getElementById('loginPass').value = '';
+            document.getElementById('loginError').textContent = '';
+            document.getElementById('loginModalOverlay').classList.add('active');
+        }
+    });
+
+    document.getElementById('loginCancel').addEventListener('click', function() {
+        document.getElementById('loginModalOverlay').classList.remove('active');
+    });
+    document.getElementById('loginModalOverlay').addEventListener('click', function(e) {
+        if (e.target === this) this.classList.remove('active');
+    });
+
+    document.getElementById('loginSubmit').addEventListener('click', function() {
+        const user = document.getElementById('loginUser').value.trim();
+        const pass = document.getElementById('loginPass').value.trim();
+        if (user === 'admin' && pass === 'administradorLiga123') {
+            sessionStorage.setItem('isAdmin', 'true');
+            isAdmin = true;
+            document.getElementById('loginModalOverlay').classList.remove('active');
+            checkLoginStatus();
+            alert('Bienvenido administrador.');
+            if (document.getElementById('teamDetailView').classList.contains('active') && currentTeamId) {
+                showTeamDetail(currentTeamId);
+            } else {
+                renderStandings();
+                renderScorers();
+                renderNews();
+            }
+        } else {
+            document.getElementById('loginError').textContent = 'Usuario o contraseña incorrectos.';
+        }
+    });
+
+    document.getElementById('loginPass').addEventListener('keydown', function(e) {
+        if (e.key === 'Enter') document.getElementById('loginSubmit').click();
+    });
+    document.getElementById('loginUser').addEventListener('keydown', function(e) {
+        if (e.key === 'Enter') document.getElementById('loginSubmit').click();
+    });
+
+    // ================================================================
+    // TEMAS
+    // ================================================================
+    function setTheme(theme) {
+        document.documentElement.setAttribute('data-theme', theme);
+        document.querySelectorAll('.theme-btn').forEach(btn => {
+            btn.classList.toggle('active', btn.dataset.theme === theme);
+        });
+        localStorage.setItem('theme', theme);
+    }
+
+    // ================================================================
+    // ESCUDO DE LA LIGA
+    // ================================================================
+    function loadLigaLogo() {
+        const stored = localStorage.getItem('ligaLogo');
+        if (stored) {
+            document.getElementById('ligaLogo').src = stored;
+        }
+    }
+
+    document.getElementById('ligaLogo').addEventListener('click', function() {
+        if (!isAdmin) { alert('Solo el administrador puede cambiar el escudo de la liga.'); return; }
+        document.getElementById('ligaLogoUpload').click();
+    });
+    document.getElementById('ligaLogoUpload').addEventListener('change', async function(e) {
+        const file = e.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = async function(ev) {
+            const compressed = await compressImage(ev.target.result, 64, 64, 0.6);
+            localStorage.setItem('ligaLogo', compressed);
+            document.getElementById('ligaLogo').src = compressed;
+        };
+        reader.readAsDataURL(file);
+        this.value = '';
+    });
+
+    // ================================================================
+    // FUNCIÓN COMPRIMIR IMÁGENES (para las subidas)
+    // ================================================================
+    function compressImage(dataUrl, maxWidth, maxHeight, quality) {
+        return new Promise((resolve) => {
+            const img = new Image();
+            img.onload = function() {
+                const canvas = document.createElement('canvas');
+                let w = img.width, h = img.height;
+                if (w > maxWidth) { h = h * maxWidth / w; w = maxWidth; }
+                if (h > maxHeight) { w = w * maxHeight / h; h = maxHeight; }
+                canvas.width = w; canvas.height = h;
+                const ctx = canvas.getContext('2d');
+                ctx.drawImage(img, 0, 0, w, h);
+                resolve(canvas.toDataURL('image/jpeg', quality));
+            };
+            img.src = dataUrl;
+        });
+    }
+
+    // ================================================================
+    // RESET BUTTON
+    // ================================================================
+    document.getElementById('resetBtn').addEventListener('click', resetAllExceptPlayers);
+
+    // ================================================================
+    // INIT
+    // ================================================================
+    document.addEventListener('DOMContentLoaded', async function() {
+        await loadData();
+
+        const savedTheme = localStorage.getItem('theme') || 'dark';
+        setTheme(savedTheme);
+        document.querySelectorAll('.theme-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                setTheme(this.dataset.theme);
+            });
+        });
+
+        loadLigaLogo();
+        checkLoginStatus();
+
+        recalcAllTeams();
+        renderStandings();
+        renderScorers();
+        renderNews();
+        populateTeamList();
+    });
+</script>
+</body>
+</html>

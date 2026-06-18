@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <title>Supercopa de Playa</title>
     <style>
-        /* ===== RESET Y VARIABLES ===== */
+        /* ===== RESET Y VARIABLES (igual que antes) ===== */
         * { margin: 0; padding: 0; box-sizing: border-box; }
         :root {
             --bg-body: #f2f4f8;
@@ -71,6 +71,33 @@
         .admin-btn:hover { background: #1d4ed8; border-color: #1d4ed8; color: white; }
         .login-btn { background: #22c55e; color: white; border-color: #22c55e; }
         .login-btn:hover { background: #16a34a; border-color: #16a34a; color: white; }
+
+        /* ===== ERROR DE CONEXIÓN ===== */
+        #connectionError {
+            display: none;
+            background: #fef2f2;
+            border: 1px solid #f87171;
+            padding: 12px 16px;
+            border-radius: var(--radius);
+            margin-bottom: 16px;
+            color: #991b1b;
+            font-weight: 500;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+        #connectionError button {
+            background: var(--accent);
+            color: white;
+            border: none;
+            padding: 6px 18px;
+            border-radius: var(--radius);
+            cursor: pointer;
+            font-weight: 600;
+            font-family: var(--font);
+            transition: 0.15s;
+        }
+        #connectionError button:hover { background: var(--accent-hover); }
 
         /* ===== TABLA GENERAL ===== */
         .standings-container { background: var(--bg-card); border: 1px solid var(--border); box-shadow: var(--shadow); padding: 20px; border-radius: var(--radius); margin-bottom: 28px; transition: background 0.3s, border 0.3s; }
@@ -221,9 +248,7 @@
             animation: shineMove 2s linear infinite;
             animation-play-state: paused;
         }
-        .player-card .shine.active {
-            animation-play-state: running;
-        }
+        .player-card .shine.active { animation-play-state: running; }
         @keyframes shineMove {
             0% { transform: translateX(-100%) translateY(-100%) rotate(45deg); }
             100% { transform: translateX(100%) translateY(100%) rotate(45deg); }
@@ -468,6 +493,12 @@
         </div>
     </header>
 
+    <!-- Mensaje de error de conexión -->
+    <div id="connectionError">
+        ⚠️ No se pudo conectar al servidor. Mostrando datos locales.
+        <button id="retryBtn">Reintentar</button>
+    </div>
+
     <!-- TABLA GENERAL -->
     <div id="standingsView" class="standings-container">
         <div class="standings-title">📊 Tabla General <span id="jornadaSpan">Jornada 1</span></div>
@@ -632,7 +663,7 @@
 
 <script>
     // ================================================================
-    // CONFIGURACIÓN DEL BACKEND (¡CAMBIA ESTA URL POR LA DE RENDER!)
+    // CONFIGURACIÓN DEL BACKEND
     // ================================================================
     const API_URL = 'https://supercopa-app.onrender.com/api/data';
 
@@ -823,37 +854,56 @@
     let currentTeamId = null;
     let currentPlayerForModal = null;
     let currentTeamNameForModal = null;
+    let usingLocalBackup = false; // Bandera para saber si estamos en modo local
 
     // ================================================================
-    // FUNCIONES DE PERSISTENCIA (conectadas al backend)
+    // FUNCIONES DE PERSISTENCIA (con respaldo localStorage)
     // ================================================================
     async function loadData() {
         try {
             const response = await fetch(API_URL);
-            if (!response.ok) throw new Error('Error al cargar datos');
+            if (!response.ok) throw new Error(`HTTP ${response.status}`);
             const data = await response.json();
             if (data && data.teams) {
                 ligaData = data;
+                // Guardar copia en localStorage
+                localStorage.setItem('ligaDataBackup', JSON.stringify(data));
+                usingLocalBackup = false;
+                document.getElementById('connectionError').style.display = 'none';
                 return data;
             } else {
-                // Si no hay datos, creamos la estructura por defecto
-                const defaultData = JSON.parse(JSON.stringify(DEFAULT_DATA));
-                await saveData(defaultData);
-                ligaData = defaultData;
-                return defaultData;
+                throw new Error('Datos inválidos');
             }
         } catch (error) {
             console.error('Error conectando con servidor:', error);
-            alert('⚠️ No se pudo conectar al servidor. Asegúrate de que el backend esté activo.');
-            // Fallback: datos locales (solo lectura)
-            if (!ligaData) {
-                ligaData = JSON.parse(JSON.stringify(DEFAULT_DATA));
+            // Intentar cargar desde localStorage
+            const backup = localStorage.getItem('ligaDataBackup');
+            if (backup) {
+                try {
+                    const parsed = JSON.parse(backup);
+                    if (parsed && parsed.teams) {
+                        ligaData = parsed;
+                        usingLocalBackup = true;
+                        document.getElementById('connectionError').style.display = 'flex';
+                        return ligaData;
+                    }
+                } catch (e) {}
             }
+            // Si no hay backup, usar datos por defecto
+            ligaData = JSON.parse(JSON.stringify(DEFAULT_DATA));
+            usingLocalBackup = true;
+            document.getElementById('connectionError').style.display = 'flex';
             return ligaData;
         }
     }
 
     async function saveData(data) {
+        if (usingLocalBackup) {
+            // Si estamos en modo local, solo guardar en localStorage
+            localStorage.setItem('ligaDataBackup', JSON.stringify(data));
+            ligaData = data;
+            return;
+        }
         try {
             const response = await fetch(API_URL, {
                 method: 'POST',
@@ -862,15 +912,22 @@
             });
             if (!response.ok) throw new Error('Error al guardar');
             ligaData = data;
+            // Actualizar backup
+            localStorage.setItem('ligaDataBackup', JSON.stringify(data));
             return await response.json();
         } catch (error) {
             console.error('Error guardando en servidor:', error);
-            alert('❌ Error al guardar los cambios en el servidor.');
+            // Guardar localmente
+            localStorage.setItem('ligaDataBackup', JSON.stringify(data));
+            ligaData = data;
+            usingLocalBackup = true;
+            document.getElementById('connectionError').style.display = 'flex';
+            alert('❌ Error al guardar en el servidor. Los cambios se guardaron localmente.');
         }
     }
 
     // ================================================================
-    // FUNCIONES DE ESTADÍSTICAS
+    // FUNCIONES DE ESTADÍSTICAS (igual que antes)
     // ================================================================
     function computeStats(team) {
         let wins = 0, draws = 0, losses = 0, gf = 0, gc = 0;
@@ -907,7 +964,7 @@
     }
 
     // ================================================================
-    // RENDER STANDINGS
+    // RENDER STANDINGS, SCORERS, NEWS (igual que antes)
     // ================================================================
     function renderStandings() {
         const sorted = [...ligaData.teams].sort((a,b) => b.points - a.points || b.gd - a.gd);
@@ -941,9 +998,6 @@
         document.getElementById('jornadaSpan').textContent = `Jornada ${calcularJornada()}`;
     }
 
-    // ================================================================
-    // RENDER GOLEADORES
-    // ================================================================
     function renderScorers() {
         const allPlayers = [];
         ligaData.teams.forEach(team => {
@@ -967,9 +1021,6 @@
         });
     }
 
-    // ================================================================
-    // RENDER NOTICIAS Y TRANSFERENCIAS
-    // ================================================================
     function renderNews() {
         const grid = document.getElementById('newsGrid');
         grid.innerHTML = '';
@@ -1060,7 +1111,7 @@
     });
 
     // ================================================================
-    // FUNCIÓN DE PORCENTAJES
+    // FUNCIÓN DE PORCENTAJES (igual)
     // ================================================================
     function calculateProbabilities(team1Name, team2Name) {
         const team1 = ligaData.teams.find(t => t.name === team1Name);
@@ -1145,7 +1196,7 @@
     }
 
     // ================================================================
-    // MODAL NOTICIAS
+    // MODAL NOTICIAS (igual)
     // ================================================================
     const modalOverlay = document.getElementById('modalOverlay');
     const modalForm = document.getElementById('modalForm');
@@ -1399,7 +1450,7 @@
     });
 
     // ================================================================
-    // DETALLE EQUIPO
+    // DETALLE EQUIPO (igual, pero con guardado local)
     // ================================================================
     function showTeamDetail(teamId) {
         currentTeamId = teamId;
@@ -1884,6 +1935,20 @@
     // RESET BUTTON
     // ================================================================
     document.getElementById('resetBtn').addEventListener('click', resetAllExceptPlayers);
+
+    // ================================================================
+    // RETRY BUTTON
+    // ================================================================
+    document.getElementById('retryBtn').addEventListener('click', async function() {
+        document.getElementById('connectionError').style.display = 'none';
+        await loadData();
+        recalcAllTeams();
+        renderStandings();
+        renderScorers();
+        renderNews();
+        populateTeamList();
+        if (currentTeamId) showTeamDetail(currentTeamId);
+    });
 
     // ================================================================
     // INIT

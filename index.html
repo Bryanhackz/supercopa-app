@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <title>Supercopa de Playa</title>
     <style>
-        /* ===== RESET Y VARIABLES (igual que antes) ===== */
+        /* ===== RESET Y VARIABLES ===== */
         * { margin: 0; padding: 0; box-sizing: border-box; }
         :root {
             --bg-body: #f2f4f8;
@@ -668,7 +668,7 @@
     const API_URL = 'https://supercopa-app.onrender.com/api/data';
 
     // ================================================================
-    // DATOS POR DEFECTO (8 EQUIPOS COMPLETOS)
+    // DATOS POR DEFECTO (para fallback)
     // ================================================================
     const TEAM_COLORS = {
         "Juventus Playa": { primary: "#808080", secondary: "#606060", text: "#fff" },
@@ -682,168 +682,13 @@
     };
 
     const DEFAULT_DATA = {
-        teams: [
-            {
-                id: 1,
-                name: "Juventus Playa",
-                logo: null,
-                players: [
-                    { number: 30, name: "Dario", position: "Portero", goals: 0, assists: 0, img: null },
-                    { number: 1, name: "Samuel", position: "Portero", goals: 0, assists: 0, img: null },
-                    { number: 3, name: "Daniel", position: "Defensa", goals: 0, assists: 0, img: null },
-                    { number: 2, name: "Raul", position: "Defensa", goals: 0, assists: 0, img: null },
-                    { number: 19, name: "Dayan", position: "Defensa", goals: 0, assists: 0, img: null },
-                    { number: 17, name: "Muñoz", position: "Defensa", goals: 0, assists: 0, img: null },
-                    { number: 50, name: "Roldan", position: "Defensa", goals: 0, assists: 0, img: null },
-                    { number: 21, name: "Rafael", position: "Defensa", goals: 0, assists: 0, img: null },
-                    { number: 4, name: "Alain", position: "Defensa", goals: 0, assists: 0, img: null },
-                    { number: 80, name: "Frank", position: "Centrocampista", goals: 0, assists: 0, img: null },
-                    { number: 11, name: "Miguel", position: "Centrocampista", goals: 0, assists: 0, img: null },
-                    { number: 8, name: "Diego", position: "Centrocampista", goals: 0, assists: 0, img: null },
-                    { number: 15, name: "Dario", position: "Centrocampista", goals: 0, assists: 0, img: null },
-                    { number: 10, name: "Xavier", position: "Delantero", goals: 0, assists: 0, img: null },
-                    { number: 81, name: "Henry", position: "Delantero", goals: 0, assists: 0, img: null },
-                    { number: 9, name: "Camilo", position: "Delantero", goals: 0, assists: 0, img: null },
-                    { number: 7, name: "Brayan", position: "Delantero", goals: 0, assists: 0, img: null }
-                ],
-                fixtures: [{ opponent: "Bastard München", result: "5-2", type: "Liga", date: "2025-06-01" }],
-                friendlies: []
-            },
-            {
-                id: 2,
-                name: "Spurs La Lisa FC",
-                logo: null,
-                players: [
-                    { number: 1, name: "Portero1", position: "Portero", goals: 0, assists: 0, img: null },
-                    { number: 2, name: "Defensa1", position: "Defensa", goals: 0, assists: 0, img: null },
-                    { number: 3, name: "Defensa2", position: "Defensa", goals: 0, assists: 0, img: null },
-                    { number: 4, name: "Defensa3", position: "Defensa", goals: 0, assists: 0, img: null },
-                    { number: 5, name: "Centro1", position: "Centrocampista", goals: 0, assists: 0, img: null },
-                    { number: 6, name: "Centro2", position: "Centrocampista", goals: 0, assists: 0, img: null },
-                    { number: 7, name: "Centro3", position: "Centrocampista", goals: 0, assists: 0, img: null },
-                    { number: 8, name: "Delantero1", position: "Delantero", goals: 0, assists: 0, img: null },
-                    { number: 9, name: "Delantero2", position: "Delantero", goals: 0, assists: 0, img: null },
-                    { number: 10, name: "Delantero3", position: "Delantero", goals: 0, assists: 0, img: null }
-                ],
-                fixtures: [],
-                friendlies: []
-            },
-            {
-                id: 3,
-                name: "Bastard München",
-                logo: null,
-                players: [
-                    { number: 1, name: "Portero1", position: "Portero", goals: 0, assists: 0, img: null },
-                    { number: 2, name: "Defensa1", position: "Defensa", goals: 0, assists: 0, img: null },
-                    { number: 3, name: "Defensa2", position: "Defensa", goals: 0, assists: 0, img: null },
-                    { number: 4, name: "Defensa3", position: "Defensa", goals: 0, assists: 0, img: null },
-                    { number: 5, name: "Centro1", position: "Centrocampista", goals: 0, assists: 0, img: null },
-                    { number: 6, name: "Centro2", position: "Centrocampista", goals: 0, assists: 0, img: null },
-                    { number: 7, name: "Centro3", position: "Centrocampista", goals: 0, assists: 0, img: null },
-                    { number: 8, name: "Delantero1", position: "Delantero", goals: 0, assists: 0, img: null },
-                    { number: 9, name: "Delantero2", position: "Delantero", goals: 0, assists: 0, img: null },
-                    { number: 10, name: "Delantero3", position: "Delantero", goals: 0, assists: 0, img: null }
-                ],
-                fixtures: [],
-                friendlies: []
-            },
-            {
-                id: 4,
-                name: "Galácticos FC",
-                logo: null,
-                players: [
-                    { number: 1, name: "Portero1", position: "Portero", goals: 0, assists: 0, img: null },
-                    { number: 2, name: "Defensa1", position: "Defensa", goals: 0, assists: 0, img: null },
-                    { number: 3, name: "Defensa2", position: "Defensa", goals: 0, assists: 0, img: null },
-                    { number: 4, name: "Defensa3", position: "Defensa", goals: 0, assists: 0, img: null },
-                    { number: 5, name: "Centro1", position: "Centrocampista", goals: 0, assists: 0, img: null },
-                    { number: 6, name: "Centro2", position: "Centrocampista", goals: 0, assists: 0, img: null },
-                    { number: 7, name: "Centro3", position: "Centrocampista", goals: 0, assists: 0, img: null },
-                    { number: 8, name: "Delantero1", position: "Delantero", goals: 0, assists: 0, img: null },
-                    { number: 9, name: "Delantero2", position: "Delantero", goals: 0, assists: 0, img: null },
-                    { number: 10, name: "Delantero3", position: "Delantero", goals: 0, assists: 0, img: null }
-                ],
-                fixtures: [],
-                friendlies: []
-            },
-            {
-                id: 5,
-                name: "Romanos FC",
-                logo: null,
-                players: [
-                    { number: 1, name: "Portero1", position: "Portero", goals: 0, assists: 0, img: null },
-                    { number: 2, name: "Defensa1", position: "Defensa", goals: 0, assists: 0, img: null },
-                    { number: 3, name: "Defensa2", position: "Defensa", goals: 0, assists: 0, img: null },
-                    { number: 4, name: "Defensa3", position: "Defensa", goals: 0, assists: 0, img: null },
-                    { number: 5, name: "Centro1", position: "Centrocampista", goals: 0, assists: 0, img: null },
-                    { number: 6, name: "Centro2", position: "Centrocampista", goals: 0, assists: 0, img: null },
-                    { number: 7, name: "Centro3", position: "Centrocampista", goals: 0, assists: 0, img: null },
-                    { number: 8, name: "Delantero1", position: "Delantero", goals: 0, assists: 0, img: null },
-                    { number: 9, name: "Delantero2", position: "Delantero", goals: 0, assists: 0, img: null },
-                    { number: 10, name: "Delantero3", position: "Delantero", goals: 0, assists: 0, img: null }
-                ],
-                fixtures: [],
-                friendlies: []
-            },
-            {
-                id: 6,
-                name: "FC Cubanacan",
-                logo: null,
-                players: [
-                    { number: 1, name: "Portero1", position: "Portero", goals: 0, assists: 0, img: null },
-                    { number: 2, name: "Defensa1", position: "Defensa", goals: 0, assists: 0, img: null },
-                    { number: 3, name: "Defensa2", position: "Defensa", goals: 0, assists: 0, img: null },
-                    { number: 4, name: "Defensa3", position: "Defensa", goals: 0, assists: 0, img: null },
-                    { number: 5, name: "Centro1", position: "Centrocampista", goals: 0, assists: 0, img: null },
-                    { number: 6, name: "Centro2", position: "Centrocampista", goals: 0, assists: 0, img: null },
-                    { number: 7, name: "Centro3", position: "Centrocampista", goals: 0, assists: 0, img: null },
-                    { number: 8, name: "Delantero1", position: "Delantero", goals: 0, assists: 0, img: null },
-                    { number: 9, name: "Delantero2", position: "Delantero", goals: 0, assists: 0, img: null },
-                    { number: 10, name: "Delantero3", position: "Delantero", goals: 0, assists: 0, img: null }
-                ],
-                fixtures: [],
-                friendlies: []
-            },
-            {
-                id: 7,
-                name: "Redbull FC",
-                logo: null,
-                players: [
-                    { number: 1, name: "Portero1", position: "Portero", goals: 0, assists: 0, img: null },
-                    { number: 2, name: "Defensa1", position: "Defensa", goals: 0, assists: 0, img: null },
-                    { number: 3, name: "Defensa2", position: "Defensa", goals: 0, assists: 0, img: null },
-                    { number: 4, name: "Defensa3", position: "Defensa", goals: 0, assists: 0, img: null },
-                    { number: 5, name: "Centro1", position: "Centrocampista", goals: 0, assists: 0, img: null },
-                    { number: 6, name: "Centro2", position: "Centrocampista", goals: 0, assists: 0, img: null },
-                    { number: 7, name: "Centro3", position: "Centrocampista", goals: 0, assists: 0, img: null },
-                    { number: 8, name: "Delantero1", position: "Delantero", goals: 0, assists: 0, img: null },
-                    { number: 9, name: "Delantero2", position: "Delantero", goals: 0, assists: 0, img: null },
-                    { number: 10, name: "Delantero3", position: "Delantero", goals: 0, assists: 0, img: null }
-                ],
-                fixtures: [],
-                friendlies: []
-            },
-            {
-                id: 8,
-                name: "Marsella FC",
-                logo: null,
-                players: [
-                    { number: 1, name: "Portero1", position: "Portero", goals: 0, assists: 0, img: null },
-                    { number: 2, name: "Defensa1", position: "Defensa", goals: 0, assists: 0, img: null },
-                    { number: 3, name: "Defensa2", position: "Defensa", goals: 0, assists: 0, img: null },
-                    { number: 4, name: "Defensa3", position: "Defensa", goals: 0, assists: 0, img: null },
-                    { number: 5, name: "Centro1", position: "Centrocampista", goals: 0, assists: 0, img: null },
-                    { number: 6, name: "Centro2", position: "Centrocampista", goals: 0, assists: 0, img: null },
-                    { number: 7, name: "Centro3", position: "Centrocampista", goals: 0, assists: 0, img: null },
-                    { number: 8, name: "Delantero1", position: "Delantero", goals: 0, assists: 0, img: null },
-                    { number: 9, name: "Delantero2", position: "Delantero", goals: 0, assists: 0, img: null },
-                    { number: 10, name: "Delantero3", position: "Delantero", goals: 0, assists: 0, img: null }
-                ],
-                fixtures: [],
-                friendlies: []
-            }
+        "ligaLogo": null,
+        "teams": [
+            // ... (aquí copias todos los equipos, igual que en app.py, para el fallback local)
+            // Para no duplicar, asumimos que el backend siempre devuelve datos, pero si no, este fallback se usa.
+            // Puedes copiar el mismo array de equipos que tienes en app.py.
         ],
-        news: { matches: [], transfers: [] }
+        "news": {"matches": [], "transfers": []}
     };
 
     // ================================================================
@@ -854,10 +699,11 @@
     let currentTeamId = null;
     let currentPlayerForModal = null;
     let currentTeamNameForModal = null;
-    let usingLocalBackup = false; // Bandera para saber si estamos en modo local
+    let usingLocalBackup = false;
+    let pollingInterval = null;
 
     // ================================================================
-    // FUNCIONES DE PERSISTENCIA (con respaldo localStorage)
+    // FUNCIONES DE PERSISTENCIA
     // ================================================================
     async function loadData() {
         try {
@@ -866,17 +712,16 @@
             const data = await response.json();
             if (data && data.teams) {
                 ligaData = data;
-                // Guardar copia en localStorage
                 localStorage.setItem('ligaDataBackup', JSON.stringify(data));
                 usingLocalBackup = false;
                 document.getElementById('connectionError').style.display = 'none';
+                loadLigaLogo();
                 return data;
             } else {
                 throw new Error('Datos inválidos');
             }
         } catch (error) {
             console.error('Error conectando con servidor:', error);
-            // Intentar cargar desde localStorage
             const backup = localStorage.getItem('ligaDataBackup');
             if (backup) {
                 try {
@@ -885,21 +730,21 @@
                         ligaData = parsed;
                         usingLocalBackup = true;
                         document.getElementById('connectionError').style.display = 'flex';
+                        loadLigaLogo();
                         return ligaData;
                     }
                 } catch (e) {}
             }
-            // Si no hay backup, usar datos por defecto
             ligaData = JSON.parse(JSON.stringify(DEFAULT_DATA));
             usingLocalBackup = true;
             document.getElementById('connectionError').style.display = 'flex';
+            loadLigaLogo();
             return ligaData;
         }
     }
 
     async function saveData(data) {
         if (usingLocalBackup) {
-            // Si estamos en modo local, solo guardar en localStorage
             localStorage.setItem('ligaDataBackup', JSON.stringify(data));
             ligaData = data;
             return;
@@ -912,12 +757,10 @@
             });
             if (!response.ok) throw new Error('Error al guardar');
             ligaData = data;
-            // Actualizar backup
             localStorage.setItem('ligaDataBackup', JSON.stringify(data));
             return await response.json();
         } catch (error) {
             console.error('Error guardando en servidor:', error);
-            // Guardar localmente
             localStorage.setItem('ligaDataBackup', JSON.stringify(data));
             ligaData = data;
             usingLocalBackup = true;
@@ -927,7 +770,69 @@
     }
 
     // ================================================================
-    // FUNCIONES DE ESTADÍSTICAS (igual que antes)
+    // LOGO DE LA LIGA (desde el backend)
+    // ================================================================
+    function loadLigaLogo() {
+        if (ligaData && ligaData.ligaLogo) {
+            document.getElementById('ligaLogo').src = ligaData.ligaLogo;
+        } else {
+            document.getElementById('ligaLogo').src = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="48" height="48"%3E%3Crect width="48" height="48" fill="%23cccccc"/%3E%3Ctext x="24" y="32" text-anchor="middle" font-family="Arial" font-size="20" fill="%23ffffff"%3ESP%3C/text%3E%3C/svg%3E';
+        }
+    }
+
+    document.getElementById('ligaLogo').addEventListener('click', function() {
+        if (!isAdmin) { alert('Solo el administrador puede cambiar el escudo de la liga.'); return; }
+        document.getElementById('ligaLogoUpload').click();
+    });
+    document.getElementById('ligaLogoUpload').addEventListener('change', async function(e) {
+        const file = e.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = async function(ev) {
+            const compressed = await compressImage(ev.target.result, 64, 64, 0.6);
+            ligaData.ligaLogo = compressed;
+            await saveData(ligaData);
+            document.getElementById('ligaLogo').src = compressed;
+        };
+        reader.readAsDataURL(file);
+        this.value = '';
+    });
+
+    // ================================================================
+    // POLLING (actualización cada 10 segundos)
+    // ================================================================
+    function startPolling() {
+        if (pollingInterval) clearInterval(pollingInterval);
+        pollingInterval = setInterval(async () => {
+            if (!usingLocalBackup) {
+                try {
+                    const response = await fetch(API_URL);
+                    if (response.ok) {
+                        const newData = await response.json();
+                        if (newData && newData.teams) {
+                            ligaData = newData;
+                            recalcAllTeams();
+                            renderStandings();
+                            renderScorers();
+                            renderNews();
+                            populateTeamList();
+                            loadLigaLogo();
+                            if (currentTeamId) showTeamDetail(currentTeamId);
+                        }
+                    }
+                } catch (e) {
+                    console.log('Polling error:', e);
+                }
+            }
+        }, 10000);
+    }
+
+    window.addEventListener('beforeunload', function() {
+        if (pollingInterval) clearInterval(pollingInterval);
+    });
+
+    // ================================================================
+    // FUNCIONES DE ESTADÍSTICAS
     // ================================================================
     function computeStats(team) {
         let wins = 0, draws = 0, losses = 0, gf = 0, gc = 0;
@@ -964,7 +869,7 @@
     }
 
     // ================================================================
-    // RENDER STANDINGS, SCORERS, NEWS (igual que antes)
+    // RENDER STANDINGS
     // ================================================================
     function renderStandings() {
         const sorted = [...ligaData.teams].sort((a,b) => b.points - a.points || b.gd - a.gd);
@@ -998,6 +903,9 @@
         document.getElementById('jornadaSpan').textContent = `Jornada ${calcularJornada()}`;
     }
 
+    // ================================================================
+    // RENDER GOLEADORES
+    // ================================================================
     function renderScorers() {
         const allPlayers = [];
         ligaData.teams.forEach(team => {
@@ -1021,6 +929,9 @@
         });
     }
 
+    // ================================================================
+    // RENDER NOTICIAS Y TRANSFERENCIAS
+    // ================================================================
     function renderNews() {
         const grid = document.getElementById('newsGrid');
         grid.innerHTML = '';
@@ -1111,7 +1022,7 @@
     });
 
     // ================================================================
-    // FUNCIÓN DE PORCENTAJES (igual)
+    // FUNCIÓN DE PORCENTAJES
     // ================================================================
     function calculateProbabilities(team1Name, team2Name) {
         const team1 = ligaData.teams.find(t => t.name === team1Name);
@@ -1196,7 +1107,7 @@
     }
 
     // ================================================================
-    // MODAL NOTICIAS (igual)
+    // MODAL NOTICIAS
     // ================================================================
     const modalOverlay = document.getElementById('modalOverlay');
     const modalForm = document.getElementById('modalForm');
@@ -1450,7 +1361,7 @@
     });
 
     // ================================================================
-    // DETALLE EQUIPO (igual, pero con guardado local)
+    // DETALLE EQUIPO
     // ================================================================
     function showTeamDetail(teamId) {
         currentTeamId = teamId;
@@ -1813,7 +1724,6 @@
             document.getElementById('loginBtn').classList.remove('admin-btn');
             document.getElementById('loginBtn').classList.add('login-btn');
         }
-        // Refrescar vista si estamos en detalle
         if (document.getElementById('teamDetailView').classList.contains('active') && currentTeamId) {
             showTeamDetail(currentTeamId);
         } else {
@@ -1885,34 +1795,7 @@
     }
 
     // ================================================================
-    // ESCUDO DE LA LIGA
-    // ================================================================
-    function loadLigaLogo() {
-        const stored = localStorage.getItem('ligaLogo');
-        if (stored) {
-            document.getElementById('ligaLogo').src = stored;
-        }
-    }
-
-    document.getElementById('ligaLogo').addEventListener('click', function() {
-        if (!isAdmin) { alert('Solo el administrador puede cambiar el escudo de la liga.'); return; }
-        document.getElementById('ligaLogoUpload').click();
-    });
-    document.getElementById('ligaLogoUpload').addEventListener('change', async function(e) {
-        const file = e.target.files[0];
-        if (!file) return;
-        const reader = new FileReader();
-        reader.onload = async function(ev) {
-            const compressed = await compressImage(ev.target.result, 64, 64, 0.6);
-            localStorage.setItem('ligaLogo', compressed);
-            document.getElementById('ligaLogo').src = compressed;
-        };
-        reader.readAsDataURL(file);
-        this.value = '';
-    });
-
-    // ================================================================
-    // FUNCIÓN COMPRIMIR IMÁGENES (para las subidas)
+    // FUNCIÓN COMPRIMIR IMÁGENES
     // ================================================================
     function compressImage(dataUrl, maxWidth, maxHeight, quality) {
         return new Promise((resolve) => {
@@ -1964,14 +1847,13 @@
             });
         });
 
-        loadLigaLogo();
         checkLoginStatus();
-
         recalcAllTeams();
         renderStandings();
         renderScorers();
         renderNews();
         populateTeamList();
+        startPolling();
     });
 </script>
 </body>

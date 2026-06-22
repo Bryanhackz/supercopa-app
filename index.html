@@ -301,8 +301,9 @@
         .fixtures-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 12px; margin-top: 6px; }
         .fixture-card { background: var(--bg-input); padding: 14px 16px; border: 1px solid var(--border); border-radius: var(--radius); transition: 0.15s; }
         .fixture-card:hover { border-color: var(--accent); }
-        .fixture-card .opponent { display: flex; justify-content: space-between; font-weight: 600; }
+        .fixture-card .opponent { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 6px; font-weight: 600; }
         .fixture-card .result { font-weight: 700; color: var(--accent); }
+        .fixture-card .forfait-badge { font-size: 0.7rem; background: var(--accent); color: #fff; padding: 0 8px; border-radius: 12px; margin-left: 6px; }
         .fixture-card .type { font-size: 0.7rem; background: var(--border); padding: 0 10px; border-radius: 12px; color: var(--text-muted); display: inline-block; margin-top: 6px; }
         .fixture-card .date { font-size: 0.75rem; color: var(--text-muted); margin-top: 4px; }
 
@@ -386,6 +387,17 @@
         }
         .fixture-modal .modal-actions .btn-save:hover {
             background: var(--accent-hover);
+        }
+        .fixture-modal label[style*="display:flex"] {
+            display: flex !important;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+        }
+        .fixture-modal label[style*="display:flex"] input[type="checkbox"] {
+            width: auto;
+            margin: 0;
+            accent-color: var(--accent);
         }
 
         /* ===== MODAL LOGIN ===== */
@@ -632,6 +644,10 @@
             <input type="text" id="fixtureResult" placeholder="goles-goles" />
             <label>Fecha (ej: 2025-06-20)</label>
             <input type="text" id="fixtureDate" placeholder="AAAA-MM-DD" value="2025-06-20" />
+            <label style="display:flex; align-items:center; gap:8px; margin-top:8px; cursor:pointer;">
+                <input type="checkbox" id="fixtureForfait" />
+                Forfait (victoria 3-0 sin contar goles)
+            </label>
             <input type="hidden" id="fixtureType" value="liga" />
             <div class="modal-actions">
                 <button class="btn-cancel" id="fixtureCancel">Cancelar</button>
@@ -684,9 +700,7 @@
     const DEFAULT_DATA = {
         "ligaLogo": null,
         "teams": [
-            // ... (aquí copias todos los equipos, igual que en app.py, para el fallback local)
-            // Para no duplicar, asumimos que el backend siempre devuelve datos, pero si no, este fallback se usa.
-            // Puedes copiar el mismo array de equipos que tienes en app.py.
+            // ... (se cargarán desde el servidor o backup)
         ],
         "news": {"matches": [], "transfers": []}
     };
@@ -841,7 +855,11 @@
             const parts = f.result.split('-').map(s => parseInt(s.trim()));
             if (parts.length === 2) {
                 const [local, visit] = parts;
-                gf += local; gc += visit;
+                // Si es forfait, no sumamos goles, pero contamos resultado
+                if (!f.forfait) {
+                    gf += local;
+                    gc += visit;
+                }
                 if (local > visit) wins++;
                 else if (local === visit) draws++;
                 else losses++;
@@ -1260,13 +1278,14 @@
     document.getElementById('addTransferBtn').addEventListener('click', () => openModal('transfer'));
 
     // ================================================================
-    // MODAL AÑADIR PARTIDO (LIGA / AMISTOSO)
+    // MODAL AÑADIR PARTIDO (LIGA / AMISTOSO) - CON FORFAIT
     // ================================================================
     const fixtureModalOverlay = document.getElementById('fixtureModalOverlay');
     const fixtureOpponent = document.getElementById('fixtureOpponent');
     const fixtureResult = document.getElementById('fixtureResult');
     const fixtureDate = document.getElementById('fixtureDate');
     const fixtureType = document.getElementById('fixtureType');
+    const fixtureForfait = document.getElementById('fixtureForfait');
     let currentTeamIdForFixture = null;
 
     function openFixtureModal(teamId, type) {
@@ -1285,6 +1304,7 @@
         fixtureResult.value = '';
         fixtureDate.value = new Date().toISOString().split('T')[0];
         fixtureType.value = type || 'liga';
+        fixtureForfait.checked = false;
         document.getElementById('fixtureModalTitle').textContent = type === 'amistoso' ? 'Añadir amistoso' : 'Añadir partido';
         fixtureModalOverlay.classList.add('active');
     }
@@ -1305,13 +1325,19 @@
         const result = fixtureResult.value.trim();
         const date = fixtureDate.value.trim();
         const type = fixtureType.value;
+        const forfait = fixtureForfait.checked;
         if (!opponentName) { alert('Selecciona un rival.'); return; }
-        if (!result || !/^\d+\s*-\s*\d+$/.test(result)) {
-            alert('Introduce el resultado en formato "goles-goles" (ej: 3-1).');
-            return;
+        let finalResult = result;
+        if (forfait) {
+            finalResult = "3-0";
+        } else {
+            if (!result || !/^\d+\s*-\s*\d+$/.test(result)) {
+                alert('Introduce el resultado en formato "goles-goles" (ej: 3-1).');
+                return;
+            }
+            finalResult = result.replace(/\s/g, '');
         }
-        const cleanResult = result.replace(/\s/g, '');
-        const parts = cleanResult.split('-').map(s => parseInt(s));
+        const parts = finalResult.split('-').map(s => parseInt(s));
         if (parts.length !== 2 || isNaN(parts[0]) || isNaN(parts[1])) {
             alert('Resultado inválido. Usa formato "3-1".');
             return;
@@ -1321,35 +1347,23 @@
         const opponent = ligaData.teams.find(t => t.name === opponentName);
         if (!team || !opponent) { alert('Error: equipo no encontrado.'); return; }
 
-        if (type === 'liga') {
-            team.fixtures.push({
-                opponent: opponentName,
-                result: cleanResult,
-                type: "Liga",
-                date: date || new Date().toISOString().split('T')[0]
-            });
-            opponent.fixtures.push({
-                opponent: team.name,
-                result: `${golesVisitante}-${golesLocal}`,
-                type: "Liga",
-                date: date || new Date().toISOString().split('T')[0]
-            });
-        } else {
-            if (!team.friendlies) team.friendlies = [];
-            if (!opponent.friendlies) opponent.friendlies = [];
-            team.friendlies.push({
-                opponent: opponentName,
-                result: cleanResult,
-                type: "Amistoso",
-                date: date || new Date().toISOString().split('T')[0]
-            });
-            opponent.friendlies.push({
-                opponent: team.name,
-                result: `${golesVisitante}-${golesLocal}`,
-                type: "Amistoso",
-                date: date || new Date().toISOString().split('T')[0]
-            });
-        }
+        // Crear fixture para el equipo (local)
+        team.fixtures.push({
+            opponent: opponentName,
+            result: finalResult,
+            type: "Liga",
+            date: date || new Date().toISOString().split('T')[0],
+            forfait: forfait
+        });
+        // Crear fixture para el rival (visitante) con resultado invertido y mismo flag
+        const rivalResult = `${golesVisitante}-${golesLocal}`;
+        opponent.fixtures.push({
+            opponent: team.name,
+            result: rivalResult,
+            type: "Liga",
+            date: date || new Date().toISOString().split('T')[0],
+            forfait: forfait
+        });
 
         saveData(ligaData);
         recalcAllTeams();
@@ -1361,7 +1375,7 @@
     });
 
     // ================================================================
-    // DETALLE EQUIPO
+    // DETALLE EQUIPO (con badge forfait)
     // ================================================================
     function showTeamDetail(teamId) {
         currentTeamId = teamId;
@@ -1491,7 +1505,7 @@
             content.appendChild(addPlayerBtn);
         }
 
-        // Partidos de Liga
+        // Partidos de Liga (con badge forfait)
         const fixTitle = document.createElement('div');
         fixTitle.className = 'section-title';
         fixTitle.innerHTML = `📅 Partidos de Liga <span class="badge">${team.fixtures.length}</span>`;
@@ -1517,7 +1531,10 @@
                 card.innerHTML = `
                     <div class="opponent">
                         <span ${isAdmin ? 'contenteditable="true" data-fixture-idx="'+idx+'" data-field="opponent"' : ''}>vs ${f.opponent}</span>
-                        <span class="result" ${isAdmin ? 'contenteditable="true" data-fixture-idx="'+idx+'" data-field="result"' : ''}>${f.result}</span>
+                        <span>
+                            <span class="result" ${isAdmin ? 'contenteditable="true" data-fixture-idx="'+idx+'" data-field="result"' : ''}>${f.result}</span>
+                            ${f.forfait ? '<span class="forfait-badge">🏳️ Forfait</span>' : ''}
+                        </span>
                     </div>
                     <div class="type" ${isAdmin ? 'contenteditable="true" data-fixture-idx="'+idx+'" data-field="type"' : ''}>${f.type}</div>
                     <div class="date" ${isAdmin ? 'contenteditable="true" data-fixture-idx="'+idx+'" data-field="date"' : ''}>${f.date}</div>

@@ -305,6 +305,7 @@
         .fixture-card .result { font-weight: 700; color: var(--accent); }
         .fixture-card .type { font-size: 0.7rem; background: var(--border); padding: 0 10px; border-radius: 12px; color: var(--text-muted); display: inline-block; margin-top: 6px; }
         .fixture-card .date { font-size: 0.75rem; color: var(--text-muted); margin-top: 4px; }
+        .fixture-card .wo-badge { background: #f59e0b; color: #fff; padding: 0 6px; border-radius: 4px; font-size: 0.6rem; font-weight: 700; margin-left: 6px; }
 
         [contenteditable="true"] { outline: none; padding: 2px 4px; transition: background 0.15s; border-radius: 4px; background: transparent; }
         [contenteditable="true"]:hover { background: var(--bg-input); }
@@ -386,6 +387,21 @@
         }
         .fixture-modal .modal-actions .btn-save:hover {
             background: var(--accent-hover);
+        }
+        /* Checkbox personalizado para WO */
+        .wo-checkbox {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 12px;
+        }
+        .wo-checkbox input[type="checkbox"] {
+            width: auto;
+            margin: 0;
+        }
+        .wo-checkbox label {
+            margin: 0;
+            font-weight: 500;
         }
 
         /* ===== MODAL LOGIN ===== */
@@ -632,6 +648,11 @@
             <input type="text" id="fixtureResult" placeholder="goles-goles" />
             <label>Fecha (ej: 2025-06-20)</label>
             <input type="text" id="fixtureDate" placeholder="AAAA-MM-DD" value="2025-06-20" />
+            <!-- Checkbox para WO -->
+            <div class="wo-checkbox">
+                <input type="checkbox" id="fixtureWO">
+                <label for="fixtureWO">Victoria por WO (3-0 a favor)</label>
+            </div>
             <input type="hidden" id="fixtureType" value="liga" />
             <div class="modal-actions">
                 <button class="btn-cancel" id="fixtureCancel">Cancelar</button>
@@ -829,7 +850,7 @@
     });
 
     // ================================================================
-    // FUNCIONES DE ESTADÍSTICAS
+    // FUNCIONES DE ESTADÍSTICAS (con soporte para WO)
     // ================================================================
     function computeStats(team) {
         let wins = 0, draws = 0, losses = 0, gf = 0, gc = 0;
@@ -838,7 +859,12 @@
             const parts = f.result.split('-').map(s => parseInt(s.trim()));
             if (parts.length === 2) {
                 const [local, visit] = parts;
-                gf += local; gc += visit;
+                // Si es WO, no sumamos goles a GF/GC
+                if (!f.wo) {
+                    gf += local;
+                    gc += visit;
+                }
+                // Determinamos resultado (victoria/derrota/empate) basado en el marcador
                 if (local > visit) wins++;
                 else if (local === visit) draws++;
                 else losses++;
@@ -1257,14 +1283,26 @@
     document.getElementById('addTransferBtn').addEventListener('click', () => openModal('transfer'));
 
     // ================================================================
-    // MODAL AÑADIR PARTIDO (LIGA / AMISTOSO)
+    // MODAL AÑADIR PARTIDO (LIGA / AMISTOSO) con soporte WO
     // ================================================================
     const fixtureModalOverlay = document.getElementById('fixtureModalOverlay');
     const fixtureOpponent = document.getElementById('fixtureOpponent');
     const fixtureResult = document.getElementById('fixtureResult');
     const fixtureDate = document.getElementById('fixtureDate');
     const fixtureType = document.getElementById('fixtureType');
+    const fixtureWO = document.getElementById('fixtureWO');
     let currentTeamIdForFixture = null;
+
+    // Cuando se marca el checkbox WO, se fija el resultado a 3-0 y se deshabilita el input de resultado
+    fixtureWO.addEventListener('change', function() {
+        if (this.checked) {
+            fixtureResult.value = '3-0';
+            fixtureResult.disabled = true;
+        } else {
+            fixtureResult.disabled = false;
+            fixtureResult.value = '';
+        }
+    });
 
     function openFixtureModal(teamId, type) {
         if (!isAdmin) { alert('Solo el administrador puede añadir partidos o amistosos.'); return; }
@@ -1280,8 +1318,10 @@
             }
         });
         fixtureResult.value = '';
+        fixtureResult.disabled = false;
         fixtureDate.value = new Date().toISOString().split('T')[0];
         fixtureType.value = type || 'liga';
+        fixtureWO.checked = false;
         document.getElementById('fixtureModalTitle').textContent = type === 'amistoso' ? 'Añadir amistoso' : 'Añadir partido';
         fixtureModalOverlay.classList.add('active');
     }
@@ -1299,13 +1339,20 @@
     document.getElementById('fixtureSave').addEventListener('click', function() {
         if (!isAdmin) { alert('No tienes permiso.'); return; }
         const opponentName = fixtureOpponent.value;
-        const result = fixtureResult.value.trim();
+        let result = fixtureResult.value.trim();
         const date = fixtureDate.value.trim();
         const type = fixtureType.value;
+        const wo = fixtureWO.checked;
+
         if (!opponentName) { alert('Selecciona un rival.'); return; }
-        if (!result || !/^\d+\s*-\s*\d+$/.test(result)) {
-            alert('Introduce el resultado en formato "goles-goles" (ej: 3-1).');
-            return;
+        // Si WO está marcado, el resultado debe ser 3-0 y no se puede editar
+        if (wo) {
+            result = '3-0';
+        } else {
+            if (!result || !/^\d+\s*-\s*\d+$/.test(result)) {
+                alert('Introduce el resultado en formato "goles-goles" (ej: 3-1).');
+                return;
+            }
         }
         const cleanResult = result.replace(/\s/g, '');
         const parts = cleanResult.split('-').map(s => parseInt(s));
@@ -1318,34 +1365,32 @@
         const opponent = ligaData.teams.find(t => t.name === opponentName);
         if (!team || !opponent) { alert('Error: equipo no encontrado.'); return; }
 
+        // Construir el objeto fixture con el flag wo
+        const fixtureData = {
+            opponent: opponentName,
+            result: cleanResult,
+            type: (type === 'liga') ? "Liga" : "Amistoso",
+            date: date || new Date().toISOString().split('T')[0],
+            wo: wo  // <-- flag de walkover
+        };
+        // Para el rival, invertimos el resultado y también marcamos wo (para que ambos tengan el flag)
+        const rivalResult = `${golesVisitante}-${golesLocal}`;
+        const rivalFixture = {
+            opponent: team.name,
+            result: rivalResult,
+            type: (type === 'liga') ? "Liga" : "Amistoso",
+            date: date || new Date().toISOString().split('T')[0],
+            wo: wo
+        };
+
         if (type === 'liga') {
-            team.fixtures.push({
-                opponent: opponentName,
-                result: cleanResult,
-                type: "Liga",
-                date: date || new Date().toISOString().split('T')[0]
-            });
-            opponent.fixtures.push({
-                opponent: team.name,
-                result: `${golesVisitante}-${golesLocal}`,
-                type: "Liga",
-                date: date || new Date().toISOString().split('T')[0]
-            });
+            team.fixtures.push(fixtureData);
+            opponent.fixtures.push(rivalFixture);
         } else {
             if (!team.friendlies) team.friendlies = [];
             if (!opponent.friendlies) opponent.friendlies = [];
-            team.friendlies.push({
-                opponent: opponentName,
-                result: cleanResult,
-                type: "Amistoso",
-                date: date || new Date().toISOString().split('T')[0]
-            });
-            opponent.friendlies.push({
-                opponent: team.name,
-                result: `${golesVisitante}-${golesLocal}`,
-                type: "Amistoso",
-                date: date || new Date().toISOString().split('T')[0]
-            });
+            team.friendlies.push(fixtureData);
+            opponent.friendlies.push(rivalFixture);
         }
 
         saveData(ligaData);
@@ -1358,7 +1403,7 @@
     });
 
     // ================================================================
-    // DETALLE EQUIPO
+    // DETALLE EQUIPO (mostrar WO en fixtures)
     // ================================================================
     function showTeamDetail(teamId) {
         currentTeamId = teamId;
@@ -1511,10 +1556,11 @@
             team.fixtures.forEach((f, idx) => {
                 const card = document.createElement('div');
                 card.className = 'fixture-card';
+                const woBadge = f.wo ? `<span class="wo-badge">WO</span>` : '';
                 card.innerHTML = `
                     <div class="opponent">
                         <span ${isAdmin ? 'contenteditable="true" data-fixture-idx="'+idx+'" data-field="opponent"' : ''}>vs ${f.opponent}</span>
-                        <span class="result" ${isAdmin ? 'contenteditable="true" data-fixture-idx="'+idx+'" data-field="result"' : ''}>${f.result}</span>
+                        <span class="result" ${isAdmin ? 'contenteditable="true" data-fixture-idx="'+idx+'" data-field="result"' : ''}>${f.result} ${woBadge}</span>
                     </div>
                     <div class="type" ${isAdmin ? 'contenteditable="true" data-fixture-idx="'+idx+'" data-field="type"' : ''}>${f.type}</div>
                     <div class="date" ${isAdmin ? 'contenteditable="true" data-fixture-idx="'+idx+'" data-field="date"' : ''}>${f.date}</div>
@@ -1566,10 +1612,11 @@
             team.friendlies.forEach((f, idx) => {
                 const card = document.createElement('div');
                 card.className = 'fixture-card';
+                const woBadge = f.wo ? `<span class="wo-badge">WO</span>` : '';
                 card.innerHTML = `
                     <div class="opponent">
                         <span ${isAdmin ? 'contenteditable="true" data-friendly-idx="'+idx+'" data-field="opponent"' : ''}>vs ${f.opponent}</span>
-                        <span class="result" ${isAdmin ? 'contenteditable="true" data-friendly-idx="'+idx+'" data-field="result"' : ''}>${f.result}</span>
+                        <span class="result" ${isAdmin ? 'contenteditable="true" data-friendly-idx="'+idx+'" data-field="result"' : ''}>${f.result} ${woBadge}</span>
                     </div>
                     <div class="type" ${isAdmin ? 'contenteditable="true" data-friendly-idx="'+idx+'" data-field="type"' : ''}>${f.type}</div>
                     <div class="date" ${isAdmin ? 'contenteditable="true" data-friendly-idx="'+idx+'" data-field="date"' : ''}>${f.date}</div>

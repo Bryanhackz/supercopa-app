@@ -9,7 +9,7 @@ CORS(app)
 DATA_FILE = '/tmp/data.json'
 
 # ============================================================
-# DATOS POR DEFECTO (con todos los jugadores actualizados)
+# DATOS POR DEFECTO (actualizados)
 # ============================================================
 DEFAULT_DATA = {
     "ligaLogo": None,
@@ -28,7 +28,8 @@ DEFAULT_DATA = {
                 {"number": 2, "name": "Raul", "position": "Defensa", "goals": 0, "assists": 0, "img": None},
                 {"number": 19, "name": "Dayan", "position": "Defensa", "goals": 0, "assists": 0, "img": None},
                 {"number": 17, "name": "Muñoz", "position": "Defensa", "goals": 0, "assists": 0, "img": None},
-                {"number": 50, "name": "Roldan", "position": "Defensa", "goals": 0, "assists": 0, "img": None},
+                # Roldan eliminado, añadimos Jean con número 5
+                {"number": 5, "name": "Jean", "position": "Defensa", "goals": 0, "assists": 0, "img": None},
                 {"number": 21, "name": "Rafael", "position": "Defensa", "goals": 0, "assists": 0, "img": None},
                 {"number": 4, "name": "Alain", "position": "Defensa", "goals": 0, "assists": 0, "img": None},
                 {"number": 80, "name": "Frank", "position": "Centrocampista", "goals": 0, "assists": 0, "img": None},
@@ -45,62 +46,39 @@ DEFAULT_DATA = {
             "wins": 0, "draws": 0, "losses": 0, "gf": 0, "gc": 0, "matches": 0, "points": 0, "gd": 0
         },
         # ------------------------------------------------------------
-        # 2. Spurs La Lisa FC
+        # 2. Bastard München (jugadores actualizados)
         # ------------------------------------------------------------
         {
             "id": 2,
-            "name": "Spurs La Lisa FC",
-            "logo": None,
-            "players": [
-                {"number": 1, "name": "Bartolo", "position": "Portero", "goals": 0, "assists": 0, "img": None},
-                {"number": 2, "name": "Richard", "position": "Defensa", "goals": 0, "assists": 0, "img": None},
-                {"number": 3, "name": "Frank", "position": "Defensa", "goals": 0, "assists": 0, "img": None},
-                {"number": 4, "name": "Cristofer", "position": "Defensa", "goals": 0, "assists": 0, "img": None},
-                {"number": 5, "name": "Ronaldo", "position": "Defensa", "goals": 0, "assists": 0, "img": None},
-                {"number": 6, "name": "Dariel", "position": "Defensa", "goals": 0, "assists": 0, "img": None},
-                {"number": 7, "name": "Cristian", "position": "Defensa", "goals": 0, "assists": 0, "img": None},
-                {"number": 8, "name": "Dayron", "position": "Defensa", "goals": 0, "assists": 0, "img": None},
-                {"number": 10, "name": "Yoel", "position": "Centrocampista", "goals": 0, "assists": 0, "img": None},
-                {"number": 11, "name": "Sergio", "position": "Centrocampista", "goals": 0, "assists": 0, "img": None},
-                {"number": 9, "name": "Yotuel", "position": "Delantero", "goals": 0, "assists": 0, "img": None},
-                {"number": 14, "name": "Zander", "position": "Delantero", "goals": 0, "assists": 0, "img": None},
-                {"number": 15, "name": "Aroko", "position": "Delantero", "goals": 0, "assists": 0, "img": None}
-            ],
-            "fixtures": [],
-            "friendlies": [],
-            "wins": 0, "draws": 0, "losses": 0, "gf": 0, "gc": 0, "matches": 0, "points": 0, "gd": 0
-        },
-        # ------------------------------------------------------------
-        # 3. Bastard München
-        # ------------------------------------------------------------
-        {
-            "id": 3,
             "name": "Bastard München",
             "logo": None,
             "players": [
-                {"number": 1, "name": "Jorgito", "position": "Portero", "goals": 0, "assists": 0, "img": None},
-                {"number": 3, "name": "Carlos", "position": "Defensa", "goals": 0, "assists": 0, "img": None},
+                # Portero
+                {"number": 1, "name": "Jorge", "position": "Portero", "goals": 0, "assists": 0, "img": None},
+                # Defensas
+                {"number": 3, "name": "Dayron", "position": "Defensa", "goals": 0, "assists": 0, "img": None},
                 {"number": 4, "name": "Javier", "position": "Defensa", "goals": 0, "assists": 0, "img": None},
-                {"number": 5, "name": "Eikon", "position": "Defensa", "goals": 0, "assists": 0, "img": None},
+                {"number": 5, "name": "Carlos", "position": "Defensa", "goals": 0, "assists": 0, "img": None},
+                {"number": 6, "name": "Carlos Enrique", "position": "Defensa", "goals": 0, "assists": 0, "img": None},
                 {"number": 12, "name": "Lionel", "position": "Defensa", "goals": 0, "assists": 0, "img": None},
+                # Mediocampistas
                 {"number": 8, "name": "David", "position": "Centrocampista", "goals": 0, "assists": 0, "img": None},
-                {"number": 10, "name": "Jean Carlos", "position": "Centrocampista", "goals": 0, "assists": 0, "img": None},
-                {"number": 11, "name": "Alex", "position": "Centrocampista", "goals": 0, "assists": 0, "img": None},
-                {"number": 15, "name": "Carlos", "position": "Centrocampista", "goals": 0, "assists": 0, "img": None},
-                {"number": 23, "name": "Maykol", "position": "Centrocampista", "goals": 0, "assists": 0, "img": None},
-                {"number": 7, "name": "Bairon", "position": "Delantero", "goals": 0, "assists": 0, "img": None},
-                {"number": 18, "name": "Jorge", "position": "Delantero", "goals": 0, "assists": 0, "img": None},
-                {"number": 19, "name": "Jose Carlos", "position": "Delantero", "goals": 0, "assists": 0, "img": None}
+                {"number": 10, "name": "Bairon", "position": "Centrocampista", "goals": 0, "assists": 0, "img": None},
+                {"number": 11, "name": "Ale", "position": "Centrocampista", "goals": 0, "assists": 0, "img": None},
+                # Delanteros
+                {"number": 7, "name": "Harold", "position": "Delantero", "goals": 0, "assists": 0, "img": None},
+                {"number": 18, "name": "José Carlos", "position": "Delantero", "goals": 0, "assists": 0, "img": None},
+                {"number": 19, "name": "Marco", "position": "Delantero", "goals": 0, "assists": 0, "img": None}
             ],
             "fixtures": [],
             "friendlies": [],
             "wins": 0, "draws": 0, "losses": 0, "gf": 0, "gc": 0, "matches": 0, "points": 0, "gd": 0
         },
         # ------------------------------------------------------------
-        # 4. Galácticos FC
+        # 3. Galácticos FC
         # ------------------------------------------------------------
         {
-            "id": 4,
+            "id": 3,
             "name": "Galácticos FC",
             "logo": None,
             "players": [
@@ -124,10 +102,10 @@ DEFAULT_DATA = {
             "wins": 0, "draws": 0, "losses": 0, "gf": 0, "gc": 0, "matches": 0, "points": 0, "gd": 0
         },
         # ------------------------------------------------------------
-        # 5. Romanos FC (se mantienen los jugadores genéricos)
+        # 4. Romanos FC
         # ------------------------------------------------------------
         {
-            "id": 5,
+            "id": 4,
             "name": "Romanos FC",
             "logo": None,
             "players": [
@@ -147,10 +125,10 @@ DEFAULT_DATA = {
             "wins": 0, "draws": 0, "losses": 0, "gf": 0, "gc": 0, "matches": 0, "points": 0, "gd": 0
         },
         # ------------------------------------------------------------
-        # 6. FC Cubanacan
+        # 5. FC Cubanacan
         # ------------------------------------------------------------
         {
-            "id": 6,
+            "id": 5,
             "name": "FC Cubanacan",
             "logo": None,
             "players": [
@@ -171,10 +149,10 @@ DEFAULT_DATA = {
             "wins": 0, "draws": 0, "losses": 0, "gf": 0, "gc": 0, "matches": 0, "points": 0, "gd": 0
         },
         # ------------------------------------------------------------
-        # 7. Redbull FC
+        # 6. Redbull FC
         # ------------------------------------------------------------
         {
-            "id": 7,
+            "id": 6,
             "name": "Redbull FC",
             "logo": None,
             "players": [
@@ -196,10 +174,10 @@ DEFAULT_DATA = {
             "wins": 0, "draws": 0, "losses": 0, "gf": 0, "gc": 0, "matches": 0, "points": 0, "gd": 0
         },
         # ------------------------------------------------------------
-        # 8. Marsella FC
+        # 7. Marsella FC
         # ------------------------------------------------------------
         {
-            "id": 8,
+            "id": 7,
             "name": "Marsella FC",
             "logo": None,
             "players": [
